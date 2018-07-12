@@ -1,10 +1,9 @@
 defmodule BatchElixir.RestClient.Transactional do
   @derive [Poison.Encoder]
   @moduledoc """
-
+  Module for interacting with the transactional API
   """
   alias BatchElixir.RestClient.Base
-  alias BatchElixir.RestClient.Transactional
 
   @type t :: %__MODULE__{
           group_id: String.t(),
@@ -38,15 +37,35 @@ defmodule BatchElixir.RestClient.Transactional do
     :wp_template
   ]
 
-  @spec send(Transactional.t()) :: {:ok, String.t()} | {:error, any()}
-  def send(transactional = %Transactional{}) do
+  @doc """
+  Send an 1-to-1 interaction one or more users.
+
+  ## Parameters
+
+    * `transactional`: Request structure
+    * `api_key`: API key of the application
+
+  ## Examples
+
+      iex>BatchElixir.RestClient.Transactional.send(%BatchElixir.RestClient.Transactional{}, "my_api_key")
+      {:ok, "returned token"}
+
+      iex>BatchElixir.RestClient.Transactional.send(%BatchElixir.RestClient.Transactional{}, "my_api_key")
+      {:error, "something bad happend"}
+  """
+  @spec send(String.t(), __MODULE__.t()) :: {:ok, String.t()} | {:error, any()}
+  def send(api_key, %__MODULE__{} = transactional) do
     transactional
-    |> Base.encode_body_and_execute_request(:post, "/transactional/send")
+    |> Base.encode_body_and_request(api_key, :post, "/transactional/send")
     |> handle_response
   end
 
-  def send!(transactional = %Transactional{}) do
-    case Transactional.send(transactional) do
+  @doc """
+  Same as send/2, but raises an exception in case of failure. Otherwise return the generated token
+  """
+  @spec send!(String.t(), __MODULE__.t()) :: String.t() | no_return()
+  def send!(api_key, %__MODULE__{} = transactional) do
+    case __MODULE__.send(api_key, transactional) do
       {:ok, token} -> token
       {:error, reason} -> raise reason
     end

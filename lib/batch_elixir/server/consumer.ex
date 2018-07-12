@@ -2,19 +2,13 @@ defmodule BatchElixir.Server.Consumer do
   use GenStage
   alias BatchElixir.RestClient.Transactional
   require Logger
-  @producer_service Application.fetch_env(:batch_elixir, :producer)
+  @producer_service BatchElixir.Server.Producer
   def start_link(_options \\ nil) do
     GenStage.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
   def init(:ok) do
-    case @producer_service do
-      {:ok, producer} ->
-        {:consumer, :ok, subscribe_to: [producer]}
-
-      :error ->
-        {:stop, "Producer not defined"}
-    end
+    {:consumer, :ok, subscribe_to: [@producer_service]}
   end
 
   def handle_events(events, _from, state) do
@@ -24,9 +18,9 @@ defmodule BatchElixir.Server.Consumer do
     {:noreply, [], state}
   end
 
-  defp do_action({:transactional, transactional}) do
+  defp do_action({api_key, :transactional, transactional}) do
     payload = Poison.encode!(transactional)
-    token = Transactional.send!(transactional)
+    token = Transactional.send!(api_key, transactional)
     Logger.debug("Success token: #{token}, payload: #{payload}")
   end
 end

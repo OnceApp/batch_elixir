@@ -1,9 +1,7 @@
 use Mix.Config
 
 config :batch_elixir,
-  api_key: "",
   rest_api_key: "",
-  producer: BatchElixir.Server.Producer,
   default_deeplink: "test://"
 
 config :logger, backends: [:console], level: :debug

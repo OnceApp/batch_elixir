@@ -26,7 +26,7 @@ defmodule BatchElixir.RestClient.BaseTest do
          }}
       end do
       assert {:ok, @success_request_body} =
-               Base.encode_body_and_execute_request(@body, :post, @url)
+               Base.encode_body_and_request(@body, "api_key", :post, @url)
     end
   end
 
@@ -39,7 +39,7 @@ defmodule BatchElixir.RestClient.BaseTest do
            body: @success_request_body_json
          }}
       end do
-      assert {:ok, @success_request_body} = Base.execute_request(:post, @url)
+      assert {:ok, @success_request_body} = Base.request("api_key", :post, @url)
     end
   end
 
@@ -54,7 +54,8 @@ defmodule BatchElixir.RestClient.BaseTest do
            body: @failed_request_body_json
          }}
       end do
-      assert {:error, @error_message} = Base.encode_body_and_execute_request(@body, :post, @url)
+      assert {:error, @error_message} =
+               Base.encode_body_and_request(@body, "api_key", :post, @url)
     end
   end
 
@@ -62,7 +63,7 @@ defmodule BatchElixir.RestClient.BaseTest do
     error = %HTTPoison.Error{reason: @error_message}
 
     with_mock HTTPoison, request: fn _method, _url, _body, _headers -> {:error, error} end do
-      assert {:error, ^error} = Base.execute_request(:get, @url)
+      assert {:error, ^error} = Base.request("api_key", :get, @url)
     end
   end
 end

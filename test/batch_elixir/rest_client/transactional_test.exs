@@ -15,7 +15,7 @@ defmodule BatchElixir.RestClient.TransactionalTest do
   @error_message "oops"
   test "sending a notification" do
     with_mock Base,
-      encode_body_and_execute_request: fn body, method, url ->
+      encode_body_and_request: fn body, _api_key, method, url ->
         assert body == @body
 
         assert method == :post
@@ -23,14 +23,14 @@ defmodule BatchElixir.RestClient.TransactionalTest do
 
         {:ok, %{"token" => "test"}}
       end do
-      assert {:ok, "test"} = Transactional.send(@body)
+      assert {:ok, "test"} = Transactional.send("api_key", @body)
     end
   end
 
   test "sending to a notification with a response error" do
     with_mock Base,
-      encode_body_and_execute_request: fn _body, _method, _url -> {:error, @error_message} end do
-      assert {:error, @error_message} = Transactional.send(@body)
+      encode_body_and_request: fn _body, _api_key, _method, _url -> {:error, @error_message} end do
+      assert {:error, @error_message} = Transactional.send("api_key", @body)
     end
   end
 end

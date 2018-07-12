@@ -15,10 +15,10 @@ defmodule BatchElixir.ApplicationTest do
   }
   test "test producer -> consumer" do
     with_mock Transactional,
-      send!: fn _body -> "test" end do
+      send!: fn _qpi_key, _body -> "test" end do
       assert capture_log(fn ->
                {:ok, pid} = BatchElixir.Application.start(nil, nil)
-               Producer.send_event({:transactional, @body}, 1000)
+               Producer.send_notification("api_key", @body, 1000)
                Process.sleep(100)
                Supervisor.stop(pid)
              end) =~ "Success"
@@ -29,12 +29,12 @@ defmodule BatchElixir.ApplicationTest do
     {:ok, pid} = BatchElixir.Application.start(nil, nil)
 
     assert capture_log([level: :error], fn ->
-             Producer.send_event({:transactional, @body}, 1000)
+             Producer.send_notification("api_key", @body, 1000)
              Process.sleep(500)
            end) != ""
 
     assert capture_log([level: :error], fn ->
-             Producer.send_event({:transactional, @body}, 1000)
+             Producer.send_notification("api_key", @body, 1000)
              Process.sleep(500)
            end) != ""
 

@@ -12,12 +12,19 @@ defmodule BatchElixir.Server.Producer do
 
   def handle_demand(_demand, state), do: {:noreply, [], state}
 
-  def handle_call(event = {:transactional, %Transactional{}}, _from, state) do
+  def handle_call({_, :transactional, %Transactional{}} = event, _from, state) do
     # Dispatch immediately
     {:reply, :ok, [event], state}
   end
 
-  def send_event(event = {:transactional, %Transactional{}}, timeout \\ 5000) do
+  @doc """
+  Send a notification through the transactional API of *Batch*
+  """
+  def send_notification(api_key, %Transactional{} = transactional, timeout \\ 5000) do
+    dispatch_event({api_key, :transactional, transactional}, timeout)
+  end
+
+  defp dispatch_event(event, timeout) do
     GenStage.call(__MODULE__, event, timeout)
   end
 end
