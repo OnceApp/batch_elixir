@@ -1,8 +1,8 @@
 defmodule BatchElixir.RestClient.Transactional.Message do
-  @derive [Poison.Encoder]
   @moduledoc """
-  Helper for creating transactional recipients object
+  Structure for message object in landing object
   """
+  @derive [Poison.Encoder]
   @type t :: %__MODULE__{
           body: String.t(),
           title: String.t()

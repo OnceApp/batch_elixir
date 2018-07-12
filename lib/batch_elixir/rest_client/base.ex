@@ -15,6 +15,8 @@ defmodule BatchElixir.RestClient.Base do
 
   def encode_body_and_execute_request(body, method, path) do
     body
+    |> BatchElixir.Utils.structure_to_map
+    |> BatchElixir.Utils.compact_map
     |> Poison.encode!()
     |> execute_request(method, path)
   end
@@ -28,7 +30,7 @@ defmodule BatchElixir.RestClient.Base do
     {:error, retrieve_error_message_from_body(body)}
   end
 
-  defp handle_response(errored), do: errored
+  defp handle_response({:error, _} = errored), do: errored
 
   defp retrieve_error_message_from_body(body_as_string) do
     body = body_as_string |> Poison.decode!()

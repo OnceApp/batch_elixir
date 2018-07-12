@@ -1,8 +1,12 @@
 defmodule BatchElixir.RestClient.Transactional.Landing do
+  @moduledoc """
+  Structure for landing object in transactional object
+  """
+  @derive [Poison.Encoder]
   defmodule Action do
     @derive [Poison.Encoder]
     @moduledoc """
-    Helper for creating transactional recipients object
+    Structure for action object in landing object
     """
     @type t :: %__MODULE__{
             action: String.t(),
@@ -13,10 +17,6 @@ defmodule BatchElixir.RestClient.Transactional.Landing do
     defstruct [:action, :label, :args]
   end
 
-  @derive [Poison.Encoder]
-  @moduledoc """
-  Helper for creating transactional recipients object
-  """
   @type t :: %__MODULE__{
           theme: String.t(),
           image: String.t(),

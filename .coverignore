@@ -1,0 +1,4 @@
+BatchElixir.RestClient.Transactional.Landing
+BatchElixir.RestClient.Transactional.Message
+BatchElixir.RestClient.Transactional.Media
+BatchElixir.RestClient.Transactional.Recipients

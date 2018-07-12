@@ -17,17 +17,7 @@ defmodule BatchElixir.Server.Producer do
     {:reply, :ok, [event], state}
   end
 
-  def handle_info({_, {:response, n}}, state) do
-   n
-   |> Enum.map(fn
-    {:ok,t}->t
-      {:error,e}-> inspect e
-    end)
-    |> Enum.each(&IO.puts/1)
-    {:noreply, [], state}
-  end
-
-  def send_data(event = {:transactional, %Transactional{}}, timeout \\ 5000) do
+  def send_event(event = {:transactional, %Transactional{}}, timeout \\ 5000) do
     GenStage.call(__MODULE__, event, timeout)
   end
 end

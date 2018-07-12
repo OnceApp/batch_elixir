@@ -1,8 +1,8 @@
 defmodule BatchElixir.RestClient.Transactional.Media do
-  @derive [Poison.Encoder]
   @moduledoc """
-    Helper for creating transactional message object
+  Structure for media object in landing object
   """
+  @derive [Poison.Encoder]
   @type t :: %__MODULE__{
           icon: String.t(),
           picture: String.t(),

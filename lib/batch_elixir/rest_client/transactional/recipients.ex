@@ -1,8 +1,8 @@
 defmodule BatchElixir.RestClient.Transactional.Recipients do
-  @derive [Poison.Encoder]
   @moduledoc """
-  Helper for creating transactional recipients object
+  Structure for recipients object in landing object
   """
+  @derive [Poison.Encoder]
   @type t :: %__MODULE__{
           tokens: [String.t(), ...],
           custom_ids: [String.t(), ...],

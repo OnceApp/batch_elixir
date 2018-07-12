@@ -12,7 +12,11 @@ defmodule BatchElixir.MixProject do
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      test_coverage: [tool: ExCoveralls, ignore_modules: @ignore_modules]
+      test_coverage: [tool: ExCov, ignore_modules: @ignore_modules],
+      preferred_cli_env: [
+        "cov": :test,
+        "cov.detail": :test
+      ]
     ]
   end
 
@@ -32,7 +36,8 @@ defmodule BatchElixir.MixProject do
       {:poison, "~> 3.1"},
       {:earmark, "~> 1.2", only: :dev},
       {:ex_doc, "~> 0.18.3", only: :dev},
-      {:excoveralls, "~> 0.9.1", only: :test},
+      {:excov, "~> 0.1", only: :test},
+      {:excov_reporter_console, "~> 0.1", only: :test},
       {:mock, "~> 0.3.0", only: :test}
     ]
   end

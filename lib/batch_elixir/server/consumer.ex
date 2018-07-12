@@ -23,15 +23,10 @@ defmodule BatchElixir.Server.Consumer do
 
     {:noreply, [], state}
   end
-  
+
   defp do_action({:transactional, transactional}) do
     payload = Poison.encode!(transactional)
-    case Transactional.send(transactional) do
-      {:ok, token} ->
-        Logger.debug(fn -> "Success" end, token: token, payload: payload)
-
-      {:error, reason} ->
-        Logger.error(fn -> "Request failed" end, reason: reason, payload: payload)
-    end
+    token = Transactional.send!(transactional)
+    Logger.debug("Success token: #{token}, payload: #{payload}")
   end
 end

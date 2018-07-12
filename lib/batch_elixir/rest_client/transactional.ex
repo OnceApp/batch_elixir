@@ -45,6 +45,13 @@ defmodule BatchElixir.RestClient.Transactional do
     |> handle_response
   end
 
+  def send!(transactional = %Transactional{}) do
+    case Transactional.send(transactional) do
+      {:ok, token} -> token
+      {:error, reason} -> raise reason
+    end
+  end
+
   defp handle_response({:ok, body}), do: {:ok, body["token"]}
   defp handle_response(errored), do: errored
 end

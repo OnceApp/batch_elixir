@@ -6,58 +6,54 @@ defmodule BatchElixir.RestClient.ConsurmerTest do
   alias BatchElixir.Server.Consumer
   use ExUnit.Case
   import Mock
-require Logger
+  import ExUnit.CaptureLog
+  require Logger
+
   @body %Transactional{
     group_id: "test",
-    message: %Message{body: "test"},
-    recipients: %Recipients{tokens: ["test"]}
+    message: %Message{body: "test", title: "test"},
+    recipients: %Recipients{custom_ids: ["test"]}
   }
-
-
   test "test producer -> consumer" do
-    with_mock Transactional,
-      send: fn _body ->
-        {:ok, "test"}
-      end do
-      {:ok, producer} = Producer.start_link()
-      {:ok, _} = Consumer.start_link()
-      Producer.send_data({:transactional,@body},1)
-      GenStage.stop producer
-    end
-  end
-  test "test producer -> consumer with an error" do
-    with_mock Transactional,
-      send: fn _body ->
-        {:error, "error"}
-      end do
-      {:ok, producer} = Producer.start_link()
-      {:ok, _} = Consumer.start_link()
-      Producer.send_data({:transactional,@body},1)
-      GenStage.stop producer
-    end
-  end
-  test "test producer -> consumer *3" do
-    with_mock Transactional,
-      send: fn _body ->
-        {:ok, "test"}
-      end do
-      {:ok, producer} = Producer.start_link()
-      {:ok, _} = Consumer.start_link()
-      Producer.send_data({:transactional,@body},1)
-      GenStage.stop producer
+    with_mock Transactional, [:passthrough], send: fn _body -> {:ok, "test"} end do
+      assert capture_log(fn ->
+               {:ok, producer} = Producer.start_link()
+               {:ok, _} = Consumer.start_link()
+               Producer.send_event({:transactional, @body}, 1000)
+               Process.sleep(100)
+               GenStage.stop(producer)
+             end) =~ "Success"
     end
   end
 
-  test "test producer without consumer " do
+  test "test producer -> consumer with an error" do
+    {:ok, producer} = Producer.start_link()
+    {:ok, _} = Consumer.start_link()
+    Producer.send_event({:transactional, @body}, 1000)
+    Process.sleep(100)
+    GenStage.stop(producer)
+  end
+
+  test "test consumer after have sent the data" do
     with_mock Transactional,
-      send: fn _body ->
-        {:ok, "test"}
-      end do
+      send!: fn _body -> "test" end do
+      assert capture_log(fn ->
+               {:ok, producer} = Producer.start_link()
+               Producer.send_event({:transactional, @body}, 1000)
+               {:ok, _} = Consumer.start_link()
+               Process.sleep(100)
+               GenStage.stop(producer)
+             end) =~ "Success"
+    end
+  end
+
+  test "test sending timeout" do
+    with_mock Transactional,
+      send!: fn _body -> "test" end do
       {:ok, producer} = Producer.start_link()
-      Producer.send_data({:transactional,@body},1)
-      {:ok, _} = Consumer.start_link()
+      Producer.send_event({:transactional, @body}, 10)
       Process.sleep(100)
-      GenStage.stop producer
+      GenStage.stop(producer)
     end
   end
 end
