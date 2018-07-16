@@ -54,7 +54,7 @@ defmodule BatchElixir.RestClient.BaseTest do
            body: @failed_request_body_json
          }}
       end do
-      assert {:error, @error_message} =
+      assert {:error, 500, @error_message} =
                Base.encode_body_and_request(@body, "api_key", :post, @url)
     end
   end

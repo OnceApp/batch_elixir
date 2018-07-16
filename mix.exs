@@ -1,9 +1,6 @@
 defmodule BatchElixir.MixProject do
+  # credo:disable-for-previous-line
   use Mix.Project
-
-  @ignore_modules File.read!("./.coverignore")
-                  |> String.split("\n")
-                  |> Enum.map(&String.to_atom(&1))
 
   def project do
     [
@@ -12,11 +9,7 @@ defmodule BatchElixir.MixProject do
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      test_coverage: [tool: ExCov, ignore_modules: @ignore_modules],
-      preferred_cli_env: [
-        "cov": :test,
-        "cov.detail": :test
-      ]
+      test_coverage: test_coverage(System.get_env("CI"))
     ]
   end
 
@@ -36,9 +29,13 @@ defmodule BatchElixir.MixProject do
       {:poison, "~> 3.1"},
       {:earmark, "~> 1.2", only: :dev},
       {:ex_doc, "~> 0.18.3", only: :dev},
-      {:excov, "~> 0.1", only: :test},
-      {:excov_reporter_console, "~> 0.1", only: :test},
-      {:mock, "~> 0.3.0", only: :test}
+      {:cobertura_cover, "~> 0.9.0", only: :test},
+      {:credo, "~> 0.9.1", only: [:dev, :test], runtime: false},
+      {:mock, "~> 0.3.0", only: :test},
+      {:dialyxir, "~> 1.0.0-rc.2", only: [:dev], runtime: false}
     ]
   end
+
+  defp test_coverage(nil), do: [tool: CoberturaCover, html_output: "cover"]
+  defp test_coverage(_), do: [tool: CoberturaCover]
 end

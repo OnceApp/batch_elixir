@@ -3,12 +3,14 @@ defmodule BatchElixir.Application do
   # for more information on OTP Applications
   @moduledoc false
 
+  @queue_implementation :"Elixir.Application".fetch_env!(:batch_elixir, :queue_implentation)
   use Application
 
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
     children = [
+      worker(@queue_implementation, []),
       worker(BatchElixir.Server.Producer, []),
       worker(BatchElixir.Server.Consumer, [])
     ]

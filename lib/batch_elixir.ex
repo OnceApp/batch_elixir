@@ -1,4 +1,9 @@
 defmodule BatchElixir do
+  alias BatchElixir.RestClient.Transactional
+  alias BatchElixir.RestClient.Transactional.Message
+  alias BatchElixir.RestClient.Transactional.Recipients
+  alias BatchElixir.Serialisation
+  alias BatchElixir.Server.Producer
   @default_deeplink Application.fetch_env!(:batch_elixir, :default_deeplink)
   @moduledoc """
   Documentation for BatchElixir.
@@ -13,13 +18,14 @@ defmodule BatchElixir do
     ```
 
   """
-  
+
   @doc """
   Send a notifcation to one or more users using the producers/consumers
 
   `custom_payload` can be either a string, structure or a map.
   If it's not provide or the value is nil, then no custom_payload will be include to the request
   """
+
   def send_notication(
         api_key,
         group_id,
@@ -40,7 +46,7 @@ defmodule BatchElixir do
       when is_map(custom_payload) do
     custom_payload =
       custom_payload
-      |> BatchElixir.Utils.structure_to_map()
+      |> Serialisation.structure_to_map()
       |> Poison.encode!()
 
     send_notication(api_key, group_id, custom_ids, title, message, deeplink, custom_payload)
@@ -49,19 +55,19 @@ defmodule BatchElixir do
   def send_notication(api_key, group_id, custom_ids, title, message, deeplink, custom_payload)
       when is_binary(custom_payload) do
     structure = create_transactional_structure(group_id, custom_ids, title, message, deeplink)
-    structure = %BatchElixir.RestClient.Transactional{structure | custom_payload: custom_payload}
+    structure = %Transactional{structure | custom_payload: custom_payload}
     _send_notication(api_key, structure)
   end
 
   defp _send_notication(api_key, transactional) do
-    BatchElixir.Server.Producer.send_notification(api_key, transactional)
+    Producer.send_notification(api_key, transactional)
   end
 
   defp create_transactional_structure(group_id, custom_ids, title, message, deeplink) do
-    message = %BatchElixir.RestClient.Transactional.Message{title: title, body: message}
-    recipients = %BatchElixir.RestClient.Transactional.Recipients{custom_ids: custom_ids}
+    message = %Message{title: title, body: message}
+    recipients = %Recipients{custom_ids: custom_ids}
 
-    %BatchElixir.RestClient.Transactional{
+    %Transactional{
       group_id: group_id,
       message: message,
       recipients: recipients,
