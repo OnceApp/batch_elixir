@@ -1,4 +1,4 @@
-defmodule BatchElixir.Utils do
+defmodule BatchElixir.Serialisation do
   @moduledoc """
   Provide some helpers
   """

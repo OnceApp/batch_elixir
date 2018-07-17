@@ -13,7 +13,7 @@ defmodule BatchElixir do
     ```
 
   """
-  
+
   @doc """
   Send a notifcation to one or more users using the producers/consumers
 
@@ -40,7 +40,8 @@ defmodule BatchElixir do
       when is_map(custom_payload) do
     custom_payload =
       custom_payload
-      |> BatchElixir.Utils.structure_to_map()
+      |> BatchElixir.Serialisation.structure_to_map()
+      |> BatchElixir.Serialisation.compact_map()
       |> Poison.encode!()
 
     send_notication(api_key, group_id, custom_ids, title, message, deeplink, custom_payload)

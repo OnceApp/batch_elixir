@@ -55,8 +55,8 @@ defmodule BatchElixir.RestClient.Base do
   """
   def encode_body_and_request(body, api_key, method, path) do
     body
-    |> BatchElixir.Utils.structure_to_map()
-    |> BatchElixir.Utils.compact_map()
+    |> BatchElixir.Serialisation.structure_to_map()
+    |> BatchElixir.Serialisation.compact_map()
     |> Poison.encode!()
     |> request(api_key, method, path)
   end
