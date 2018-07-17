@@ -29,11 +29,16 @@ defmodule BatchElixir.RestClient.Base do
 
     BatchElixir.RestClient.Base.request(~s/{"group_id": "test"}/, "my_rest_api_key", :post, "/transactional/send")
   """
-  def request(body \\ "", api_key, method, path) do
+
+  def request(body, api_key, method, path) do
     url = create_full_api_uri(api_key, path)
 
     response = HTTPoison.request(method, url, body, generate_http_headers())
     handle_response(response)
+  end
+
+  def request(api_key, :get, path) do
+    request("", api_key, :get, path)
   end
 
   @doc """
