@@ -4,6 +4,7 @@ defmodule BatchElixir.Server.Queue.Memory do
   """
   alias BatchElixir.Server.Queue
   use GenServer
+
   @behaviour Queue
   @queue_name Queue.queue_name()
 
@@ -32,6 +33,7 @@ defmodule BatchElixir.Server.Queue.Memory do
 
   def handle_call({:push, item}, _from, queue) do
     queue = :queue.in(item, queue)
+
     {:reply, :ok, queue}
   end
 

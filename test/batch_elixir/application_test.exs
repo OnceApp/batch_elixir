@@ -14,6 +14,17 @@ defmodule BatchElixir.ApplicationTest do
     message: %Message{body: "test", title: "test"},
     recipients: %Recipients{custom_ids: ["test"]}
   }
+  test "error with queue test producer -> consumer" do
+    with_mock Transactional,
+      send: fn _qpi_key, _body -> {:error, 500, "test"} end do
+               {:ok, pid} = BatchElixir.Application.start(nil, nil)
+               Producer.send_notification("api_key", @body)
+               Process.sleep(500)
+               Supervisor.stop(pid)
+
+    end
+  end
+
   test "test producer -> consumer" do
     with_mock Transactional,
       send: fn _qpi_key, _body -> {:ok, "test"} end do
