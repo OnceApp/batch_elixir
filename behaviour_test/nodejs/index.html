@@ -13,13 +13,17 @@
     </script>
 </body>
 <script type="text/javascript">
-  self.addEventListener('push', function(event) {
-  if (event.data) {
-    console.log('This push event has data: ', event.data.text());
-  } else {
-    console.log('This push event has no data.');
-  }
-});
+    self.addEventListener('push', function (event) {
+        if (event.data) {
+            console.log('This push event has data: ', event.data.text());
+        } else {
+            console.log('This push event has no data.');
+        }
+    });
+    navigator.serviceWorker.addEventListener('message', function (event) {
+        console.log("Client 1 Received Message: " + event.data);
+        event.ports[0].postMessage("Client 1 Says 'Hello back!'");
+    });
     (function (b, a, t, c, h, e, r) {
         h = 'batchSDK'; b[h] = b[h] || function () {
             (b[h].q = b[h].q || []).push(arguments)
@@ -31,6 +35,7 @@
         apiKey: "B775B73B378B4A0183DF5519678C26F2",
         subdomain: '012345678910111213141516171819',
         authKey: '1.L9gygNPOJhcsldkkSclAME51QJAfYCBVGhJNbWWyjOc=',
+
         dev: true, // REMOVE THIS FOR PRODUCTIONvi
         vapidPublicKey: 'BGwstLbvLSWV0oTvOgMh6a1bQLObrPpX/KM59JKq5l0Ij23RqJH9Xy+FBdWZLvdSkSGdE/Qxc+oAZQ6KlaUYAvU='
     });

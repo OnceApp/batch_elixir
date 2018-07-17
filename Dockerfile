@@ -10,7 +10,7 @@ ADD behaviour_test/confd /etc/confd/
 ADD mix.exs mix.lock /app/
 ADD config /app/config/
 ADD behaviour_test/elixir /app/behaviour_test/elixir/
-RUN mix do local.hex --force, deps.get
+RUN mix do local.hex --force, local.rebar --force, deps.get
 ADD lib /app/lib/
 ADD behaviour_test/entrypoint.sh /bin/entrypoint.sh
 ENTRYPOINT [ "/bin/entrypoint.sh" ]
