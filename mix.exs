@@ -18,7 +18,7 @@ defmodule BatchElixir.MixProject do
     [
       applications: [:httpoison],
       extra_applications: [:logger]
-    ]
+    ] ++ mod_application(Mix.env())
   end
 
   # Run "mix help deps" to learn about dependencies.
@@ -35,6 +35,9 @@ defmodule BatchElixir.MixProject do
       {:dialyxir, "~> 1.0.0-rc.2", only: [:dev], runtime: false}
     ]
   end
+
+  defp mod_application(:test), do: []
+  defp mod_application(_env), do: [mod: {BatchElixir.Application, []}]
 
   defp test_coverage(nil), do: [tool: CoberturaCover, html_output: "cover"]
   defp test_coverage(_), do: [tool: CoberturaCover]

@@ -2,9 +2,11 @@ defmodule BatchElixir.Server.Producer do
   @moduledoc false
   use GenStage
   alias BatchElixir.RestClient.Transactional
+  require Logger
   @global_producer_service {:global, BatchProducer}
   @queue_implementation Application.fetch_env!(:batch_elixir, :queue_implentation)
   def start_link do
+    Logger.info(fn -> "Starting producer" end)
     case GenStage.start_link(__MODULE__, :ok, name: @global_producer_service) do
       {:ok, pid} ->
         {:ok, pid}

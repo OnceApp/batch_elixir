@@ -12,6 +12,7 @@ defmodule BatchElixir.Server.Consumer do
   end
 
   def init(:ok) do
+    Logger.info(fn -> "Starting consumer" end)
     {:consumer, :ok, subscribe_to: [@producer_service]}
   end
 

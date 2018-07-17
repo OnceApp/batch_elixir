@@ -8,7 +8,14 @@ defmodule BatchElixir.Server.Queue.Memory do
   @queue_name Queue.queue_name()
 
   def start_link do
-    GenServer.start_link(__MODULE__, :ok, name: @queue_name)
+    case GenServer.start_link(__MODULE__, :ok, name: @queue_name) do
+      {:ok, pid} ->
+        {:ok, pid}
+
+      {:error, {:already_started, pid}} ->
+        Process.link(pid)
+        {:ok, pid}
+    end
   end
 
   def init(:ok) do
