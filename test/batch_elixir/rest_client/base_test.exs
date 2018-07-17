@@ -26,7 +26,7 @@ defmodule BatchElixir.RestClient.BaseTest do
          }}
       end do
       assert {:ok, @success_request_body} =
-               Base.encode_body_and_request(@body, "api_key", :post, @url)
+               Base.encode_body_and_request(@body, "api_key", :get, @url)
     end
   end
 
@@ -39,7 +39,7 @@ defmodule BatchElixir.RestClient.BaseTest do
            body: @success_request_body_json
          }}
       end do
-      assert {:ok, @success_request_body} = Base.request("api_key", :post, @url)
+      assert {:ok, @success_request_body} = Base.request("api_key", :get, @url)
     end
   end
 
