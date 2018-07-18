@@ -8,7 +8,7 @@ if [ -z "$KEY_API" ]; then
 	echo "SDK API key:"
 	read KEY_API
 fi
-
+export KEY_API KEY_REST_API
 echo "Webpage for notification: https://localhost:3000"
 echo "Post for notification: http://localhost:8080"
 sleep 5

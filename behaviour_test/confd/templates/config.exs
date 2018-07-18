@@ -31,7 +31,8 @@ use Mix.Config
 config :batch_elixir,
   rest_api_key: "{{getv "/key/rest/api"}}",
   default_deeplink: "behaviour://",
-  queue_implentation: BatchElixir.Server.Queue.Memory
+  devices: [web: "B775B73B378B4A0183DF5519678C26F2"],
+  number_of_consumers: 4
 config :behaviour_test, api_key:  "{{getv "/key/api"}}"
 config :logger, backends: [:console], level: :debug
 config :clusterable,

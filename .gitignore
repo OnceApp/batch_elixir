@@ -107,5 +107,6 @@ modules.xml
 .DS_Store
 *.http
 coverage.xml
+coverage.html
 
 node_modules/

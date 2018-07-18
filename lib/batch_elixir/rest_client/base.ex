@@ -1,4 +1,5 @@
 defmodule BatchElixir.RestClient.Base do
+  alias BatchElixir.Environment
   alias BatchElixir.Serialisation
 
   @moduledoc """
@@ -9,7 +10,7 @@ defmodule BatchElixir.RestClient.Base do
   defp generate_http_headers,
     do: [
       "Content-Type": "application/json",
-      "X-Authorization": Application.fetch_env!(:batch_elixir, :rest_api_key)
+      "X-Authorization": Environment.get(:rest_api_key)
     ]
 
   defp create_full_api_uri(api_key, path), do: @api_uri <> api_key <> path

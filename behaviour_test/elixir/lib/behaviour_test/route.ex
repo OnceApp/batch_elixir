@@ -15,7 +15,8 @@ defmodule BehaviourTest.Route do
   plug(:dispatch)
 
   post "/" do
-    Logger.debug(inspect(Node.list))
+    Logger.debug(inspect(Node.list()))
+
     conn
     |> read_body()
     |> notify()
@@ -26,17 +27,19 @@ defmodule BehaviourTest.Route do
     params = conn.body_params
 
     BatchElixir.send_notication(
-      @api_key,
+      :web,
       params["group_id"],
       params["custom_ids"],
       params["title"],
       params["message"]
     )
-
-    :ok
   end
 
   defp send_response(:ok, conn) do
     send_resp(conn, 204, "")
+  end
+
+  defp send_response({:error, reason}, conn) do
+    send_resp(conn, 500, reason)
   end
 end

@@ -3,7 +3,7 @@
 use Mix.Config
 
 config :batch_elixir,
-  rest_api_key: "",
+  devices: [],
   default_deeplink: "test://",
   queue_implentation: BatchElixir.Server.Queue.Memory
 

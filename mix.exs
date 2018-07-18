@@ -16,6 +16,12 @@ defmodule BatchElixir.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
+      env: [
+        producer_name: {:global, BatchProducer},
+        queue_name: {:global, BatchQueue},
+        queue_implementation: BatchElixir.Server.Queue.Memory,
+        number_of_consumers: 1
+      ],
       applications: [:httpoison],
       extra_applications: [:logger]
     ] ++ mod_application(Mix.env())
@@ -37,7 +43,7 @@ defmodule BatchElixir.MixProject do
   end
 
   defp mod_application(:test), do: []
-  defp mod_application(_env), do: [mod: {BatchElixir.Application, []}]
+  defp mod_application(_env), do: [mod: {BatchElixir.Application, 1}]
 
   defp test_coverage(nil), do: [tool: CoberturaCover, html_output: "cover"]
   defp test_coverage(_), do: [tool: CoberturaCover]

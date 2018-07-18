@@ -6,7 +6,7 @@ defmodule BehaviourTest do
     import Supervisor.Spec, warn: false
 
     children = [
-      worker(Clusterable, [], restart: :transient),
+     # worker(Clusterable, [], restart: :transient),
       Plug.Adapters.Cowboy2.child_spec(
         scheme: :http,
         plug: BehaviourTest.Route,
