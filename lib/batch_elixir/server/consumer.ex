@@ -7,7 +7,7 @@ defmodule BatchElixir.Server.Consumer do
   require Logger
 
   @http_status_code_for_not_retry [400, 401, 404]
-  
+
   def start_link(opts \\ []) do
     GenStage.start_link(
       __MODULE__,
@@ -20,7 +20,7 @@ defmodule BatchElixir.Server.Consumer do
     Logger.info(fn -> "Starting consumer" end)
 
     {:consumer, Environment.get(:queue_implementation),
-     subscribe_to: [Environment.get(:producer_name)]}
+     subscribe_to: [{Environment.get(:producer_name), Environment.get(:consumer_options)}]}
   end
 
   def handle_events(events, _from, state) do

@@ -15,13 +15,12 @@ defmodule BatchElixir.Server.Producer do
   end
 
   def handle_demand(incoming_demand, _state) do
-    Logger.debug("inc: #{incoming_demand}")
     dispatch_events(incoming_demand)
   end
 
-  def handle_cast({_, :transactional, %Transactional{}} = event, demands) do
+  def handle_cast({_, :transactional, %Transactional{}} = event, _demands) do
     Environment.get(:queue_implementation).push(event)
-    dispatch_events(demands)
+    dispatch_events(1)
   end
 
   @doc """

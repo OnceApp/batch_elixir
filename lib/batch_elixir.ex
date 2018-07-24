@@ -15,8 +15,14 @@ defmodule BatchElixir do
 
     ```elixir
     config :batch_elixir,
-      devices: "your rest api key of batch",
-      default_deeplink: "myapp://"
+      rest_api_key: "rest api key", # Required, if not provided the application fail to start
+      devices: [web: "sdk key", ios: "sdk key", ...], # List of devices that the notification can use. The key name are up to you
+      default_deeplink: "myapp://",
+      producer_name: {:global, BatchProducer}, # Default, name of the producer
+      consumer_options: [], # Default to empty, extra options like mix/max demand for Genstage
+      queue_name: {:global, BatchQueue}, # Default, name of the batch queue
+      queue_implementation: BatchElixir.Server.Queue.Memory, # Default implentation of the queue
+      number_of_consumers: 1 # Number of consumer to start, default to 1
     ```
 
   """
@@ -25,8 +31,19 @@ defmodule BatchElixir do
   Send a notifcation to one or more users using the producers/consumers
 
   `custom_payload` can be either a string, structure or a map.
-  If it's not provide or the value is nil, then no custom_payload will be include to the request
+  If it's not provide or the value is nil, then no custom_payload will be include to the request.
+  If the API key for the `device` does not exists return `{:error, reason}`,
+  otherwise returns `:ok`.
   """
+  @spec send_notication(
+          device :: atom(),
+          group_id :: String.t(),
+          custom_ids :: [String.t()],
+          title :: String.t(),
+          message :: String.t(),
+          deeplink :: String.t(),
+          custom_payload :: String.t() | nil
+        ) :: :ok | {:error, String.t()}
   def send_notication(
         device,
         group_id,
@@ -69,7 +86,6 @@ defmodule BatchElixir do
   end
 
   defp _send_notication_with_api_key(api_key, transactional, _device) do
-
     Producer.send_notification(api_key, transactional)
     :ok
   end

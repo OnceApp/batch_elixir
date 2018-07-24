@@ -4,7 +4,6 @@ use Mix.Config
 config :batch_elixir, queue_implentation: BatchElixir.Server.Queue.Memory
 
 config :batch_elixir,
-  rest_api_key: "",
   devices: [],
   default_deeplink: "test://"
 

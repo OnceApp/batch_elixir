@@ -1,21 +1,53 @@
 # BehaviourTest
 
-**TODO: Add description**
+![Diagram](./testing.png)
 
-## Installation
+It's a simple project made to test the **batch_elixir**.
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `behaviour_test` to your list of dependencies in `mix.exs`:
+* The `elixir` folder contains the elixir code wrapping the **batch_elixir** with an HTTP endpoint.
+* The `nodejs` folder contains the code for the webapp server
 
-```elixir
-def deps do
-  [
-    {:behaviour_test, "~> 0.1.0"}
-  ]
-end
+## Testing
+
+### Docker image
+
+The docker image is based on elixir 1.6 deiban stretch with java, selenium and firefox
+
+### Requirements
+
+In order to launch the test you need `docker` and `docker-compose`
+
+### Launch
+
+You will need the `rest api key` you can either
+
+* export the variable `REST_API_KEY`
+* Set it when asked in the launch script.
+
+```sh
+./launch.sh
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/behaviour_test](https://hexdocs.pm/behaviour_test).
+### Testing without docker
 
+To test without docker you will need
+
+* the last version of firefox
+* Java 8+
+* Selenium standalone [https://selenium-release.storage.googleapis.com/3.13/selenium-server-standalone-3.13.0.jar](https://selenium-release.storage.googleapis.com/3.13/selenium-server-standalone-3.13.0.jar)
+* the gecko driver [https://github.com/mozilla/geckodriver](https://github.com/mozilla/geckodriver)
+
+Steps to launch the tests:
+
+* Update the config/config.exs to add
+    ```elixir
+    config :batch_elixir, rest_api_key: "rest api key"
+    ```
+* Launch selenium
+    ```bash
+    java -Dwebdriver.gecko.driver=/path/to/geckodriver -jar /path/to/selenium-standalone
+    ```
+* Launch the test
+    ```bash
+    mix test
+    ```

@@ -28,13 +28,13 @@ const workerReady = new Promise((resolve, reject) => {
 
 const eventsList = ['pushsubscriptionchange', 'install', 'push', 'notificationclick', 'message'];
 eventsList.forEach((eventName) => {
-  self.addEventListener(eventName, (event) => {
+  self.addEventListener(eventName, function (event) {
     event.waitUntil(
       workerReady
-        .then(() => {
+        .then(function () {
           return self.handleBatchSDKEvent(eventName, event);
         })
-        .catch(() => { })
+        .catch(function () { })
     );
   });
 });
@@ -50,15 +50,31 @@ function send_message_to_client(client, msg) {
       }
     };
 
-    client.postMessage("SW Says: '" + msg + "'", [msg_chan.port2]);
+    client.postMessage(msg, [msg_chan.port2]);
   });
 }
 function send_message_to_all_clients(msg) {
-  console.log(clients)
-  clients.matchAll().then(clients => {
-    clients.forEach(client => {
-      send_message_to_client(client, msg).then(m => console.log("SW Received Message: " + m));
-    })
-  })
+  clients
+    .matchAll({ includeUncontrolled: true, type: 'window' })
+    .then(clients =>
+      clients
+        .forEach(client =>
+          send_message_to_client(client, msg)
+        )
+    )
+    .catch(console.log)
 }
-send_message_to_all_clients("test")
+
+self.addEventListener('push', function (event) {
+  event.waitUntil(
+    workerReady
+      .then(() => {
+        if (event.data) {
+          send_message_to_all_clients(event.data.json());
+        } else {
+          send_message_to_all_clients(false)
+        }
+      })
+      .catch(() => { })
+  )
+})

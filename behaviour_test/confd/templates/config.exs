@@ -32,13 +32,7 @@ config :batch_elixir,
   rest_api_key: "{{getv "/key/rest/api"}}",
   default_deeplink: "behaviour://",
   devices: [web: "B775B73B378B4A0183DF5519678C26F2"],
-  number_of_consumers: 4
-config :behaviour_test, api_key:  "{{getv "/key/api"}}"
+  number_of_consumers: 1,
+  consumer_options: [min_demand: 50, max_demand: 100]
 config :logger, backends: [:console], level: :debug
-config :clusterable,
-  cookie: :my_cookie,
-  app_name: "my_app"
-config :libcluster,
-  topologies: [
-    clusterable: [strategy: Cluster.Strategy.Gossip]
-  ]
+config :hound, browser: "firefox"

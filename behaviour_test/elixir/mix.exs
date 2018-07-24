@@ -16,7 +16,6 @@ defmodule BehaviourTest.MixProject do
     [
       applications: [:cowboy, :plug, :batch_elixir],
       extra_applications: [:logger],
-      mod: {BehaviourTest, []}
     ]
   end
 
@@ -26,7 +25,7 @@ defmodule BehaviourTest.MixProject do
       {:cowboy, "~> 2.0"},
       {:plug, "~> 1.0"},
       {:batch_elixir, path: "../../"},
-      {:clusterable, "~> 0.2"}
+      {:hound, "~> 1.0"}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
     ]

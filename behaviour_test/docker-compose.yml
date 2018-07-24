@@ -1,17 +1,7 @@
 version: "3.2"
 services: 
-  batch_elixir:
+  test:
     build: ../
     image:  batch_elixir:elixir
     environment: 
       KEY_REST_API: $KEY_REST_API
-      KEY_API: $KEY_API
-    ports: 
-      - 8080:8080
-  test:
-    build: ./
-    image:  batch_elixir:nodejs
-    ports: 
-      - 3000:3000
-    depends_on: 
-      - batch_elixir

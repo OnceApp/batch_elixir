@@ -18,6 +18,7 @@ defmodule BatchElixir.MixProject do
     [
       env: [
         producer_name: {:global, BatchProducer},
+        consumer_options: [],
         queue_name: {:global, BatchQueue},
         queue_implementation: BatchElixir.Server.Queue.Memory,
         number_of_consumers: 1

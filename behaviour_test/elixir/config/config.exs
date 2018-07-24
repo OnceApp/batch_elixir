@@ -3,18 +3,12 @@
 use Mix.Config
 
 config :batch_elixir,
-  devices: [],
+  devices: [web: "B775B73B378B4A0183DF5519678C26F2"],
   default_deeplink: "test://",
   queue_implentation: BatchElixir.Server.Queue.Memory
 
-config :behaviour_test, api_key: ""
 config :logger, backends: [:console], level: :debug
 
-config :clusterable,
-  cookie: :my_cookie,
-  app_name: "my_app"
-
-config :libcluster,
-  topologies: [
-    clusterable: [strategy: Cluster.Strategy.Gossip]
-  ]
+config :hound,
+  browser: "firefox",
+  retry_time: 500

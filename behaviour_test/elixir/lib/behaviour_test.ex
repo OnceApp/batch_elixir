@@ -4,13 +4,18 @@ defmodule BehaviourTest do
 
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
-
     children = [
-     # worker(Clusterable, [], restart: :transient),
+      # worker(Clusterable, [], restart: :transient),
       Plug.Adapters.Cowboy2.child_spec(
-        scheme: :http,
+        scheme: :https,
         plug: BehaviourTest.Route,
-        options: [port: 8080]
+        options: [
+          port: 3000,
+          otp_app: :behaviour_test,
+          cipher_suite: :compatible,
+          keyfile: System.cwd() <> "/../ssl/server.key",
+          certfile: System.cwd() <> "/../ssl/server.crt"
+        ]
       )
     ]
 
