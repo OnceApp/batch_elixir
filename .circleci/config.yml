@@ -16,9 +16,9 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - run: cd dev && mix local.hex --force  # install Hex locally (without prompt)
-      - run: cd dev && mix local.rebar --force  # fetch a copy of rebar (without prompt)
+      - run: mix local.hex --force  # install Hex locally (without prompt)
+      - run: mix local.rebar --force  # fetch a copy of rebar (without prompt)
 
       # specify any bash command here prefixed with `run: `
-      - run: cd dev && MIX_ENV=test mix do deps.get, compile
-      - run: cd dev && MIX_ENV=test mix test
+      - run: MIX_ENV=test mix do deps.get, compile
+      - run: MIX_ENV=test mix test
