@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+    <ul id="notifications"></ul>
+    </script>
+</body>
+<script type="text/javascript">
+    (function (b, a, t, c, h, e, r) {
+        h = 'batchSDK'; b[h] = b[h] || function () {
+            (b[h].q = b[h].q || []).push(arguments)
+        }; e = a.createElement(t), r = a.getElementsByTagName(t)[0];
+        e.async = 1; e.src = c; r.parentNode.insertBefore(e, r);
+    })(window, document, 'script', 'https://via.batch.com/v2/bootstrap.min.js');
+
+    batchSDK('setup', {
+        apiKey: "B775B73B378B4A0183DF5519678C26F2",
+        subdomain: '012345678910111213141516171819',
+        authKey: '1.L9gygNPOJhcsldkkSclAME51QJAfYCBVGhJNbWWyjOc=',
+
+        dev: true, // REMOVE THIS FOR PRODUCTIONvi
+        vapidPublicKey: 'BGwstLbvLSWV0oTvOgMh6a1bQLObrPpX/KM59JKq5l0Ij23RqJH9Xy+FBdWZLvdSkSGdE/Qxc+oAZQ6KlaUYAvU='
+    });
+
+    batchSDK(function (api) {
+        api.getInstallationID()
+            .then(install_id => api.setCustomUserID(`behaviour_test_${install_id}`))
+            .then(r => {
+                var div = document.createElement("div")
+                div.setAttribute('id', 'customer')
+                div.innerText = r
+                document.body.appendChild(div)
+                return api.subscribe()
+            })
+            .then(function (r) {
+                var div = document.createElement("div")
+                div.setAttribute('id', 'load')
+                div.innerText = JSON.stringify(r)
+                document.body.appendChild(div)
+            })
+    })
+
+    var notifications = document.querySelector("#notifications")
+    navigator.serviceWorker.addEventListener('message', function (event) {
+        var li = document.createElement("li")
+        li.innerText = event.data.title + " " + event.data.alert
+        notifications.appendChild(li)
+    });
+</script>
+
+</html>

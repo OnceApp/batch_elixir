@@ -60,17 +60,6 @@ defmodule BatchElixir.RestClient.Transactional do
     |> handle_response
   end
 
-  @doc """
-  Same as send/2, but raises an exception in case of failure. Otherwise return the generated token
-  """
-  @spec send!(String.t(), __MODULE__.t()) :: String.t() | no_return()
-  def send!(api_key, %__MODULE__{} = transactional) do
-    case __MODULE__.send(api_key, transactional) do
-      {:ok, token} -> token
-      {:error, reason} -> raise reason
-    end
-  end
-
   defp handle_response({:ok, body}), do: {:ok, body["token"]}
   defp handle_response(errored), do: errored
 end

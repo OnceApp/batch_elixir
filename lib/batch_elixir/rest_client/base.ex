@@ -1,4 +1,7 @@
 defmodule BatchElixir.RestClient.Base do
+  alias BatchElixir.Environment
+  alias BatchElixir.Serialisation
+
   @moduledoc """
   Rest client for interating with the **Batch** API.
   """
@@ -7,7 +10,7 @@ defmodule BatchElixir.RestClient.Base do
   defp generate_http_headers,
     do: [
       "Content-Type": "application/json",
-      "X-Authorization": Application.fetch_env!(:batch_elixir, :rest_api_key)
+      "X-Authorization": Environment.get(:rest_api_key)
     ]
 
   defp create_full_api_uri(api_key, path), do: @api_uri <> api_key <> path
@@ -31,8 +34,8 @@ defmodule BatchElixir.RestClient.Base do
   def request(body, api_key, method, path) do
     url = create_full_api_uri(api_key, path)
 
-    HTTPoison.request(method, url, body, generate_http_headers())
-    |> handle_response
+    response = HTTPoison.request(method, url, body, generate_http_headers())
+    handle_response(response)
   end
 
   def request(api_key, :get, path) do
@@ -55,8 +58,8 @@ defmodule BatchElixir.RestClient.Base do
   """
   def encode_body_and_request(body, api_key, method, path) do
     body
-    |> BatchElixir.Serialisation.structure_to_map()
-    |> BatchElixir.Serialisation.compact_map()
+    |> Serialisation.structure_to_map()
+    |> Serialisation.compact_map()
     |> Poison.encode!()
     |> request(api_key, method, path)
   end
@@ -66,8 +69,8 @@ defmodule BatchElixir.RestClient.Base do
     Poison.decode(body)
   end
 
-  defp handle_response({:ok, %HTTPoison.Response{body: body}}) do
-    {:error, retrieve_error_message_from_body(body)}
+  defp handle_response({:ok, %HTTPoison.Response{status_code: status_code, body: body}}) do
+    {:error, status_code, retrieve_error_message_from_body(body)}
   end
 
   defp handle_response({:error, _} = errored), do: errored

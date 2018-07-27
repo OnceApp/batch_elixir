@@ -1,59 +1,91 @@
-defmodule BatchElixir.RestClient.ConsurmerTest do
-  alias BatchElixir.Server.Producer
+defmodule BatchElixir.Server.ConsurmerTest do
+  defmodule MockProducer do
+    use GenStage
+
+    def start_link do
+      GenStage.start_link(__MODULE__, :ok, name: __MODULE__)
+    end
+
+    def init(:ok) do
+      {:producer, 0}
+    end
+
+    def handle_demand(_, _) do
+      {:noreply, [], 0}
+    end
+  end
+
   alias BatchElixir.RestClient.Transactional
   alias BatchElixir.RestClient.Transactional.Message
   alias BatchElixir.RestClient.Transactional.Recipients
   alias BatchElixir.Server.Consumer
+  alias BatchElixir.Server.Producer
+  alias BatchElixir.Server.Queue.Memory
   use ExUnit.Case
   import Mock
-  import ExUnit.CaptureLog
-  require Logger
 
   @body %Transactional{
     group_id: "test",
     message: %Message{body: "test", title: "test"},
     recipients: %Recipients{custom_ids: ["test"]}
   }
-  test "test producer -> consumer" do
-    with_mock Transactional, [:passthrough], send: fn _body, _api_key -> {:ok, "test"} end do
-      assert capture_log(fn ->
-               {:ok, producer} = Producer.start_link()
-               {:ok, _} = Consumer.start_link()
-               Producer.send_notification("api_key", @body, 1000)
-               Process.sleep(100)
-               GenStage.stop(producer)
-             end) =~ "Success"
+
+  defp assert_down(pid) do
+    ref = Process.monitor(pid)
+    assert_receive {:DOWN, ^ref, _, _, _}
+  end
+
+  setup do
+    {:ok, pid} = Memory.start_link()
+
+    on_exit(fn ->
+      assert_down(pid)
+    end)
+  end
+
+  defp generate_events(number_of_events \\ 1) do
+    for _ <- 1..number_of_events, do: {"api_key", :transactional, @body}
+  end
+
+  test "starting a consumer" do
+    assert {:ok, mock_pid} = MockProducer.start_link()
+    Application.put_env(:batch_elixir, :producer_name, mock_pid)
+    assert {:ok, pid} = Consumer.start_link()
+
+    GenStage.stop(pid)
+    GenStage.stop(mock_pid)
+  end
+
+  test "send events without error" do
+    with_mock Transactional,
+      send: fn _api_key, _body -> {:ok, "test"} end do
+      Consumer.handle_events(generate_events(3), nil, Memory)
+      assert [] = Memory.pop()
     end
   end
 
-  test "test producer -> consumer with an error" do
-    {:ok, producer} = Producer.start_link()
-    {:ok, _} = Consumer.start_link()
-    Producer.send_notification("api_key", @body, 1000)
-    Process.sleep(100)
-    GenStage.stop(producer)
-  end
-
-  test "test consumer after have sent the data" do
+  test "send events with errors that should be retried" do
     with_mock Transactional,
-      send!: fn _api_key, _body -> "test" end do
-      assert capture_log(fn ->
-               {:ok, producer} = Producer.start_link()
-               Producer.send_notification("api_key", @body, 1000)
-               {:ok, _} = Consumer.start_link()
-               Process.sleep(100)
-               GenStage.stop(producer)
-             end) =~ "Success"
+      send: fn _api_key, _body -> {:error, 500, "test"} end do
+      events = generate_events(3)
+      Consumer.handle_events(events, nil, Memory)
+      assert ^events = Memory.pop(5)
     end
   end
 
-  test "test sending timeout" do
+  test "send events with http errors that should not be retried" do
     with_mock Transactional,
-      send!: fn _api_key, _body -> "test" end do
-      {:ok, producer} = Producer.start_link()
-      Producer.send_notification("api_key", @body, 10)
-      Process.sleep(100)
-      GenStage.stop(producer)
+      send: fn _api_key, _body -> {:error, 400, "test"} end do
+      Consumer.handle_events(generate_events(3), nil, Memory)
+      assert [] = Memory.pop(5)
+    end
+  end
+
+  test "send events with errors that should not be retried" do
+    with_mock Transactional,
+      send: fn _api_key, _body -> {:error, "test"} end do
+      Consumer.handle_events(generate_events(3), nil, Memory)
+      assert [] = Memory.pop(5)
     end
   end
 end

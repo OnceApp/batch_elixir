@@ -1,0 +1,6 @@
+[template]
+src = "config.exs"
+dest = "/app/behaviour_test/elixir/config/config.exs"
+keys = [
+    "/key",
+]

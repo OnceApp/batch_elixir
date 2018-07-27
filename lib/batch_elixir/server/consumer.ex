@@ -1,14 +1,26 @@
 defmodule BatchElixir.Server.Consumer do
+  @moduledoc false
   use GenStage
+  alias BatchElixir.Environment
   alias BatchElixir.RestClient.Transactional
+  alias BatchElixir.Serialisation
   require Logger
-  @producer_service BatchElixir.Server.Producer
-  def start_link(_options \\ nil) do
-    GenStage.start_link(__MODULE__, :ok, name: __MODULE__)
+
+  @http_status_code_for_not_retry [400, 401, 404]
+
+  def start_link(opts \\ []) do
+    GenStage.start_link(
+      __MODULE__,
+      :ok,
+      opts
+    )
   end
 
   def init(:ok) do
-    {:consumer, :ok, subscribe_to: [@producer_service]}
+    Logger.info(fn -> "Starting consumer" end)
+
+    {:consumer, Environment.get(:queue_implementation),
+     subscribe_to: [{Environment.get(:producer_name), Environment.get(:consumer_options)}]}
   end
 
   def handle_events(events, _from, state) do
@@ -18,9 +30,45 @@ defmodule BatchElixir.Server.Consumer do
     {:noreply, [], state}
   end
 
-  defp do_action({api_key, :transactional, transactional}) do
-    payload = Poison.encode!(transactional)
-    token = Transactional.send!(api_key, transactional)
-    Logger.debug("Success token: #{token}, payload: #{payload}")
+  defp do_action({api_key, :transactional, transactional} = event) do
+    payload =
+      transactional
+      |> Serialisation.structure_to_map()
+      |> Serialisation.compact_map()
+      |> Poison.encode!()
+
+    handle_action_result(
+      Transactional.send(api_key, transactional),
+      payload,
+      event
+    )
+  end
+
+  defp handle_action_result({:ok, token}, payload, _event) do
+    Logger.debug(fn -> "Success token: #{token}, payload: #{payload}" end)
+  end
+
+  defp handle_action_result({:error, reason}, _payload, _event) do
+    Logger.error(fn -> reason end)
+  end
+
+  defp handle_action_result({:error, status_code, reason}, payload, event) do
+    is_code_allowed? = is_code_allowed_for_retry?(status_code)
+
+    is_code_allowed?
+    |> handle_http_error(reason, payload, event)
+  end
+
+  defp handle_http_error(true, reason, _payload, event) do
+    Logger.error(fn -> reason end)
+    Environment.get(:queue_implementation).push(event)
+  end
+
+  defp handle_http_error(false, reason, payload, _event) do
+    Logger.error(fn -> ~s/"Error "#{reason}", payload: #{payload}, not retrying/ end)
+  end
+
+  defp is_code_allowed_for_retry?(status_code) do
+    !Enum.member?(@http_status_code_for_not_retry, status_code)
   end
 end

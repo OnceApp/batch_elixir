@@ -1,0 +1,7 @@
+version: "3.2"
+services: 
+  test:
+    build: ../
+    image:  batch_elixir:elixir
+    environment: 
+      KEY_REST_API: $KEY_REST_API
