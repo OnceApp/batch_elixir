@@ -3,7 +3,9 @@ defmodule BatchElixir.Server.Consumer do
   use GenStage
   alias BatchElixir.Environment
   alias BatchElixir.RestClient.Transactional
+  alias BatchElixir.Server.Retry
   alias BatchElixir.Serialisation
+  alias BatchElixir.Stats
   require Logger
 
   @http_status_code_for_not_retry [400, 401, 404]
@@ -19,7 +21,7 @@ defmodule BatchElixir.Server.Consumer do
   def init(:ok) do
     Logger.info(fn -> "Starting consumer" end)
 
-    {:consumer, Environment.get(:queue_implementation),
+    {:consumer, nil,
      subscribe_to: [{Environment.get(:producer_name), Environment.get(:consumer_options)}]}
   end
 
@@ -30,42 +32,86 @@ defmodule BatchElixir.Server.Consumer do
     {:noreply, [], state}
   end
 
-  defp do_action({api_key, :transactional, transactional} = event) do
+  defp get_max_attempts, do: Application.get_env(:batch_elixir, :max_attempts, 3)
+
+  defp do_action({{api_key, :transactional, transactional} = event, attempts}) do
+    Stats.increment("batch.requests.total")
+
     payload =
       transactional
       |> Serialisation.structure_to_map()
       |> Serialisation.compact_map()
       |> Poison.encode!()
 
+    result = transactional_send(api_key, transactional)
+
     handle_action_result(
-      Transactional.send(api_key, transactional),
+      result,
       payload,
-      event
+      event,
+      attempts
     )
   end
 
-  defp handle_action_result({:ok, token}, payload, _event) do
+  defp transactional_send(api_key, transactional) do
+    Stats.measure("batch.requests.timing", fn ->
+      Transactional.send(api_key, transactional)
+    end)
+  end
+
+  defp handle_action_result({:ok, token}, payload, _event, _attempts) do
     Logger.debug(fn -> "Success token: #{token}, payload: #{payload}" end)
+    Stats.increment("batch.requests.succeed")
   end
 
-  defp handle_action_result({:error, reason}, _payload, _event) do
-    Logger.error(fn -> reason end)
+  defp handle_action_result(
+         {:error, %HTTPoison.Error{reason: :econnrefused = reason}},
+         _payload,
+         event,
+         attempts
+       ) do
+    Logger.error(fn -> inspect(reason) end)
+    retry_if_required(event, attempts)
   end
 
-  defp handle_action_result({:error, status_code, reason}, payload, event) do
+  defp handle_action_result({:error, reason}, _payload, _event, _attempts) do
+    Logger.error(fn -> inspect(reason) end)
+    Stats.increment("batch.requests.failed")
+  end
+
+  defp handle_action_result({:error, status_code, reason}, payload, event, attempts) do
     is_code_allowed? = is_code_allowed_for_retry?(status_code)
 
     is_code_allowed?
-    |> handle_http_error(reason, payload, event)
+    |> handle_http_error(reason, payload, event, attempts)
   end
 
-  defp handle_http_error(true, reason, _payload, event) do
+  defp handle_http_error(true, reason, _payload, event, attempts) do
     Logger.error(fn -> reason end)
-    Environment.get(:queue_implementation).push(event)
+    retry_if_required(event, attempts)
   end
 
-  defp handle_http_error(false, reason, payload, _event) do
+  defp handle_http_error(false, reason, payload, _event, _attempts) do
     Logger.error(fn -> ~s/"Error "#{reason}", payload: #{payload}, not retrying/ end)
+    Stats.increment("batch.requests.failed")
+  end
+
+  defp retry_if_required(event, attempts) do
+    attempts
+    |> should_retry?
+    |> handle_retry(event, attempts)
+  end
+
+  defp should_retry?(attempts), do: attempts < get_max_attempts()
+
+  defp handle_retry(true, event, attempts) do
+    Retry.push({event, attempts + 1})
+
+    Stats.increment("batch.requests.retried")
+  end
+
+  defp handle_retry(false, _event, _attempts) do
+    Stats.increment("batch.requests.failed")
   end
 
   defp is_code_allowed_for_retry?(status_code) do

@@ -19,7 +19,6 @@ defmodule BatchElixir.Server.ConsurmerTest do
   alias BatchElixir.RestClient.Transactional.Message
   alias BatchElixir.RestClient.Transactional.Recipients
   alias BatchElixir.Server.Consumer
-  alias BatchElixir.Server.Producer
   alias BatchElixir.Server.Queue.Memory
   use ExUnit.Case
   import Mock
@@ -36,14 +35,17 @@ defmodule BatchElixir.Server.ConsurmerTest do
   end
 
   setup do
+    assert {:ok, stat} = BatchElixir.Stats.start_link()
+
     {:ok, pid} = Memory.start_link()
 
     on_exit(fn ->
       assert_down(pid)
+      assert_down(stat)
     end)
   end
 
-  defp generate_events(number_of_events \\ 1) do
+  defp generate_events(number_of_events) do
     for _ <- 1..number_of_events, do: {"api_key", :transactional, @body}
   end
 

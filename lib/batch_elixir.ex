@@ -4,8 +4,6 @@ defmodule BatchElixir do
   alias BatchElixir.RestClient.Transactional.Recipients
   alias BatchElixir.Serialisation
   alias BatchElixir.Server.Producer
-  @default_deeplink Application.fetch_env!(:batch_elixir, :default_deeplink)
-  @devices Application.get_env(:batch_elixir, :devices)
 
   @moduledoc """
   Documentation for BatchElixir.
@@ -50,13 +48,24 @@ defmodule BatchElixir do
         custom_ids,
         title,
         message,
-        deeplink \\ @default_deeplink,
+        deeplink \\ nil,
         custom_payload \\ nil
       )
 
+  def send_notication(device, group_id, custom_ids, title, message, nil, custom_payload) do
+    send_notication(
+      device,
+      group_id,
+      custom_ids,
+      title,
+      message,
+      get_default_deeplink(),
+      custom_payload
+    )
+  end
+
   def send_notication(device, group_id, custom_ids, title, message, deeplink, nil) do
     structure = create_transactional_structure(group_id, custom_ids, title, message, deeplink)
-
     _send_notication(device, structure)
   end
 
@@ -78,7 +87,7 @@ defmodule BatchElixir do
   end
 
   defp _send_notication(device, transactional) do
-    _send_notication_with_api_key(@devices[device], transactional, device)
+    _send_notication_with_api_key(devices()[device], transactional, device)
   end
 
   defp _send_notication_with_api_key(nil, _transactional, device) do
@@ -101,4 +110,7 @@ defmodule BatchElixir do
       deeplink: deeplink
     }
   end
+
+  defp get_default_deeplink, do: Application.fetch_env!(:batch_elixir, :default_deeplink)
+  defp devices, do: Application.get_env(:batch_elixir, :devices)
 end

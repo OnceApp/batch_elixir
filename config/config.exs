@@ -9,3 +9,10 @@ config :batch_elixir,
 
 config :logger, backends: [:console], level: :debug
 config :ex_unit, assert_receive_timeout: 2000
+
+config :statix,
+  prefix: "test",
+  host: "localhost",
+  port: 8125
+
+config :blip, port: 8125

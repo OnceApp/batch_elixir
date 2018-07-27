@@ -5,15 +5,13 @@ defmodule BatchElixir.RestClient.Base do
   @moduledoc """
   Rest client for interating with the **Batch** API.
   """
-  @api_version "1.1"
-  @api_uri "https://api.batch.com/#{@api_version}/"
   defp generate_http_headers,
     do: [
       "Content-Type": "application/json",
       "X-Authorization": Environment.get(:rest_api_key)
     ]
 
-  defp create_full_api_uri(api_key, path), do: @api_uri <> api_key <> path
+  defp create_full_api_uri(api_key, path), do: Environment.get(:batch_url) <> api_key <> path
 
   @doc """
   Send an HTTP request to an endpoint of *Batch* API.

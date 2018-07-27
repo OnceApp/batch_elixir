@@ -11,16 +11,19 @@ defmodule BatchElixir.Server.Producer do
   end
 
   def init(:ok) do
-    {:producer, 0}
+    {:producer, 0, Environment.get(:producer_options)}
   end
 
-  def handle_demand(incoming_demand, _state) do
-    dispatch_events(incoming_demand)
+  def handle_demand(_incoming_demand, _state) do
+    dispatch_events(0)
   end
 
   def handle_cast({_, :transactional, %Transactional{}} = event, _demands) do
-    Environment.get(:queue_implementation).push(event)
-    dispatch_events(1)
+    dispatch_events([{event, 0}])
+  end
+
+  def handle_cast(events, _demands) when is_list(events) do
+    dispatch_events(events)
   end
 
   @doc """
@@ -30,12 +33,23 @@ defmodule BatchElixir.Server.Producer do
     GenStage.cast(Environment.get(:producer_name), {api_key, :transactional, transactional})
   end
 
+  @doc """
+  Send a notification through the transactional API of *Batch*
+  """
+  def send_notifications(events) do
+    GenStage.cast(Environment.get(:producer_name), events)
+  end
+
   defp dispatch_events(0) do
     {:noreply, [], 0}
   end
 
-  defp dispatch_events(demands) do
-    events = Environment.get(:queue_implementation).pop(demands)
-    {:noreply, events, demands}
+  defp dispatch_events(events) do
+    {:noreply, events, length(events)}
   end
+
+  # defp dispatch_events(demands) do
+  #   events = Environment.get(:queue_implementation).pop(demands)
+  #   {:noreply, events, demands}
+  # end
 end

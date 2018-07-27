@@ -33,7 +33,6 @@ config :batch_elixir,
   producer_name: {:global, BatchProducer}, # name of the producer. By default the producer is global
   consumer_options: [], # extra options for GenStage as consumer. Typically [min_demand:10, max_demand: 100]
   queue_name: {:global, BatchQueue}, # name of the queue service. By default the producer is global
-  queue_implementation: BatchElixir.Server.Queue.Memory, # Implentation used for the queue. By default the queue is in memory
   number_of_consumers: 1 # Number of consumers to pop. By default is 1
 ```
 
