@@ -6,18 +6,17 @@ defmodule BatchElixir.Stats.Memory do
   end
 
   def init(:ok) do
-    {:ok, %{started: :os.system_time(:milli_seconds), count: %{}, timing: %{}}}
+    {:ok, %{started: System.system_time(:milliseconds), count: %{}, timing: %{}}}
   end
 
-  def handle_call({:increment, key, value}, _from, state) do
+  def handle_cast({:increment, key, value}, state) do
     current = state.count[key]
-    {:reply, :ok, %{state | count: increment(current, state.count, key, value)}}
+    {:noreply, %{state | count: increment(current, state.count, key, value)}}
   end
 
-  def handle_call({:measure, key, func}, _from, state) do
-    {time, result} = :timer.tc(func)
+  def handle_cast({:timing, key, value}, state) do
     current = state.timing[key]
-    {:reply, result, %{state | timing: increment(current, state.timing, key, time)}}
+    {:noreply, %{state | timing: increment(current, state.timing, key, value)}}
   end
 
   def handle_call(:dump, _from, state) do

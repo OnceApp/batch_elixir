@@ -1,10 +1,12 @@
 defmodule StubBatch do
+  alias StubBatch.Toxiproxy
   use Application
   require Logger
 
-  def start(_type, _args) do
+  def start(_type, arguments) do
     import Supervisor.Spec, warn: false
-    port = Application.get_env(:stub_batch, :port, 8080)
+    arguments = Toxiproxy.setup_toxiproxy_and_correct_port(arguments)
+    port = arguments.port
 
     children = [
       Plug.Adapters.Cowboy2.child_spec(

@@ -32,7 +32,7 @@ defmodule BatchElixir.Server.Consumer do
     {:noreply, [], state}
   end
 
-  defp get_max_attempts, do: Application.get_env(:batch_elixir, :max_attempts, 3)
+  defp get_max_attempts, do: Environment.get(:max_attempts)
 
   defp do_action({{api_key, :transactional, transactional} = event, attempts}) do
     Stats.increment("batch.requests.total")
@@ -92,7 +92,7 @@ defmodule BatchElixir.Server.Consumer do
   end
 
   defp handle_http_error(false, reason, payload, _event, _attempts) do
-    Logger.error(fn -> ~s/"Error "#{reason}", payload: #{payload}, not retrying/ end)
+    Logger.error(fn -> ~s/Error "#{reason}", payload: #{payload}, not retrying/ end)
     Stats.increment("batch.requests.failed")
   end
 

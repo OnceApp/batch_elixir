@@ -38,7 +38,7 @@ defmodule StressTest.Stats do
     {:noreply, {pid, value}}
   end
 
-  def schedule, do: Process.send_after(self(), :dump, 100)
+  def schedule, do: Process.send_after(self(), :dump, 1_000)
 
   defp get_value(nil), do: 0
   defp get_value(value), do: value

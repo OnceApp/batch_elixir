@@ -11,26 +11,6 @@ defmodule BatchElixir.Application do
   end
 
   defp _start([]) do
-    topologies =
-    Application.get_env(
-      :libcluster,
-      :topologies,
-      batch: [
-        # The selected clustering strategy. Required.
-        strategy: Cluster.Strategy.Epmd,
-        # Configuration for the provided strategy. Optional.
-        config: [hosts: [Node.self()]],
-        # The function to use for connecting nodes. The node
-        # name will be appended to the argument list. Optional
-        connect: {:net_kernel, :connect_node, []},
-        # The function to use for disconnecting nodes. The node
-        # name will be appended to the argument list. Optional
-        disconnect: {:erlang, :disconnect_node, []},
-        # The function to use for listing nodes.
-        # This function must return a list of node names. Optional
-        list_nodes: {:erlang, :nodes, [:connected]}
-      ]
-    )
     number_of_consumers = Environment.get(:number_of_consumers)
 
     consumers =
@@ -44,10 +24,9 @@ defmodule BatchElixir.Application do
 
     children =
       [
-        {Cluster.Supervisor, [topologies, [name: Batch.ClusterSupervisor]]},
         %{
           id: BatchElixir.Server.Retry,
-          start: { BatchElixir.Server.Retry, :start_link, []},
+          start: {BatchElixir.Server.Retry, :start_link, []},
           restart: :permanent
         },
         %{

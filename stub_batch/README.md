@@ -1,21 +1,16 @@
 # StubBatch
 
-**TODO: Add description**
-
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `stub_batch` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:stub_batch, "~> 0.1.0"}
-  ]
-end
+```bash
+mix escript.build
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/stub_batch](https://hexdocs.pm/stub_batch).
+```bash
+./stub_batch --toxiproxy --latency 1000 --jitter 500 8080
+```
 
+* `--toxiproxy`: configure toxiproxy. Toxiproxy must be running. If not toxiproxy will not be configured.
+* `--latency ms`: Latency in milliseconds. (Must have `toxiproxy` flag enabled)
+* `--jitter ms`: Jitter in milliseconds (latency +/- jitter). (Must have `toxiproxy` flag enabled) 
+* `port`: Port of the stub (default to 8080)

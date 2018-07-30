@@ -15,4 +15,3 @@ config :statix,
   host: "localhost",
   port: 8125
 
-config :blip, port: 8125

@@ -12,6 +12,10 @@
         "global",
         "Elixir.BatchQueue"
     ],
+    "producer_name": [
+        "global",
+        "Elixir.BatchProducer"
+    ],
     "number_of_consumers": 10,
     "consumer_options": [
         [
@@ -23,5 +27,5 @@
             2000
         ]
     ],
-    "retry_interval": 100
+    "retry_interval_in_milliseconds": 100
 }

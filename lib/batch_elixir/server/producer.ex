@@ -47,9 +47,4 @@ defmodule BatchElixir.Server.Producer do
   defp dispatch_events(events) do
     {:noreply, events, length(events)}
   end
-
-  # defp dispatch_events(demands) do
-  #   events = Environment.get(:queue_implementation).pop(demands)
-  #   {:noreply, events, demands}
-  # end
 end

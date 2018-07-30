@@ -11,7 +11,9 @@ defmodule StressTest.Config do
     number_of_consumers: 1,
     batch_url: "http://localhost:8080/",
     rest_api_key: "test",
-    devices: [web: "test"]
+    devices: [web: "test"],
+    retry_interval_in_milliseconds: 1_000,
+    max_attempts: 3
   ]
   def setup(options) when is_binary(options) do
     setup_config(@default)
@@ -35,6 +37,14 @@ defmodule StressTest.Config do
 
   defp setup_config(options) do
     Logger.remove_backend(:console)
+    Logger.add_backend({LoggerFileBackend, :stress_test})
+
+    Logger.configure_backend(
+      {LoggerFileBackend, :stress_test},
+      path: System.cwd() <> "/stress_test.log",
+      level: :warn
+    )
+
     # Logger.configure_backend(:console, level: :warn)
     Enum.each(options, &_setup_config/1)
   end

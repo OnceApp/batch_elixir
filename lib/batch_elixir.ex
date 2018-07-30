@@ -18,9 +18,11 @@ defmodule BatchElixir do
       default_deeplink: "myapp://",
       producer_name: {:global, BatchProducer}, # Default, name of the producer
       consumer_options: [], # Default to empty, extra options like mix/max demand for Genstage
-      queue_name: {:global, BatchQueue}, # Default, name of the batch queue
-      queue_implementation: BatchElixir.Server.Queue.Memory, # Default implentation of the queue
-      number_of_consumers: 1 # Number of consumer to start, default to 1
+      producer_options: [], # extra options for GenStage as producer. Typically [buffer_size: 10_000]
+      batch_url: "https://api.batch.com/1.1/", # Base url of batch api
+      retry_interval_in_milliseconds: 1_000, # Interval between each failed requests
+      max_attempts: 3, # Maximum attempts of failed requests
+      number_of_consumers: 1 # Number of consumers to pop. By default is 1
     ```
 
   """

@@ -7,18 +7,18 @@ defmodule BatchElixir.Stats.Statix do
   end
 
   def init(:ok) do
-    BatchElixir.Stats.Statix.connect()
+    __MODULE__.connect()
     {:ok, nil}
   end
 
-  def handle_call({:increment, key, value}, _from, _state) do
-    BatchElixir.Stats.Statix.increment(key, value)
-    {:reply, :ok, nil}
+  def handle_cast({:increment, key, value}, _state) do
+    __MODULE__.increment(key, value)
+    {:noreply, nil}
   end
 
-  def handle_call({:measure, key, func}, _from, _state) do
-    result = BatchElixir.Stats.Statix.measure(key, [], func)
-    {:reply, result, nil}
+  def handle_cast({:timing, key, value}, _state) do
+    __MODULE__.timing(key, value)
+    {:noreply, nil}
   end
 
   def handle_call(:dump, _from, _state) do

@@ -14,11 +14,17 @@ defmodule BatchElixir.Stats do
   end
 
   def increment(key, value \\ 1) do
-    GenServer.call(get_stats_driver(), {:increment, key, value})
+    GenServer.cast(get_stats_driver(), {:increment, key, value})
   end
 
-  def measure(key, func) do
-    GenServer.call(get_stats_driver(), {:measure, key, func})
+  def timing(key, value) do
+    GenServer.cast(get_stats_driver(), {:timing, key, value})
+  end
+
+  def measure(key, func) when is_function(func, 0) do
+    {elapsed, result} = :timer.tc(func)
+    timing(key, div(elapsed, 1000))
+    result
   end
 
   def dump() do

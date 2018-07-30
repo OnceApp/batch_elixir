@@ -3,6 +3,7 @@ defmodule BatchElixir.Server.Retry do
   In memory implementation of Queue
   """
   use GenServer
+  alias BatchElixir.Environment
   alias BatchElixir.Server.Producer
 
   def start_link do
@@ -23,7 +24,7 @@ defmodule BatchElixir.Server.Retry do
   end
 
   def handle_call({:push, {event, attempts}}, _from, queue) do
-    now = :os.system_time(:milli_seconds) + get_retry_interval()
+    now = :os.system_time(:milli_seconds) + get_retry_interval_in_milliseconds()
     queue = [{event, attempts, now} | queue]
 
     {:reply, :ok, queue}
@@ -55,6 +56,6 @@ defmodule BatchElixir.Server.Retry do
   defp should_retry?({_, _, retry}, now) when now >= retry, do: true
   defp should_retry?({_, _, _}, _now), do: false
 
-  defp get_retry_interval, do: Application.get_env(:batch_elixir, :retry_interval, 100)
-  def schedule, do: Process.send_after(self(), :retry, get_retry_interval())
+  defp get_retry_interval_in_milliseconds, do: Environment.get(:retry_interval_in_milliseconds)
+  def schedule, do: Process.send_after(self(), :retry, get_retry_interval_in_milliseconds())
 end

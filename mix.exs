@@ -20,10 +20,11 @@ defmodule BatchElixir.MixProject do
         stats_driver: BatchElixir.Stats.Memory,
         producer_name: {:global, BatchProducer},
         consumer_options: [],
-        producer_options: [buffer_size: :infinity],
-        queue_name: {:global, BatchQueue},
+        producer_options: [],
         number_of_consumers: 1,
-        batch_url: "https://api.batch.com/1.1/"
+        batch_url: "https://api.batch.com/1.1/",
+        retry_interval_in_milliseconds: 1_000,
+        max_attempts: 3
       ],
       applications: [:httpoison, :statix],
       extra_applications: [:logger]
@@ -35,8 +36,6 @@ defmodule BatchElixir.MixProject do
     [
       {:httpoison, "~> 1.0"},
       {:gen_stage, "~> 0.14"},
-      {:swarm, "~> 3.0"},
-      {:libcluster, "~> 3.0"},
       {:poison, "~> 3.1"},
       {:statix, "~> 1.1"},
       {:earmark, "~> 1.2", only: :dev},
@@ -47,7 +46,8 @@ defmodule BatchElixir.MixProject do
       {:dialyxir, "~> 1.0.0-rc.2", only: [:dev, :test], runtime: false},
       {:progress_bar, "~> 1.6", only: [:dev, :test]},
       {:timex, "~> 3.1", only: [:dev, :test]},
-      {:table_rex, "~> 0.10", only: [:dev, :test]}
+      {:table_rex, "~> 0.10", only: [:dev, :test]},
+      {:logger_file_backend, "~> 0.0.10", only: [:dev, :test]}
     ]
   end
 

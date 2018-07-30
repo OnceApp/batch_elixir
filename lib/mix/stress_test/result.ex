@@ -135,7 +135,7 @@ defmodule StressTest.Result do
 
     timing =
       timing
-      |> Duration.from_microseconds()
+      |> Duration.from_milliseconds()
       |> Timex.format_duration(:humanized)
 
     [

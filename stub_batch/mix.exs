@@ -11,13 +11,15 @@ defmodule StubBatch.MixProject do
       escript: escript()
     ]
   end
+
   defp escript do
     [main_module: StubBatch.CLI]
   end
+
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      applications: [:cowboy, :plug],
+      applications: [:cowboy, :plug, :httpoison],
       extra_applications: [:logger]
     ]
   end
@@ -28,7 +30,8 @@ defmodule StubBatch.MixProject do
       {:cowboy, "~> 2.0"},
       {:plug, "~> 1.0"},
       {:uuid, "~> 1.1"},
-      {:poison, "~> 3.1"}
+      {:poison, "~> 3.1"},
+      {:httpoison, "~> 1.0"}
     ]
   end
 end
