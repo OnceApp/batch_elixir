@@ -47,8 +47,7 @@ defmodule BatchElixir.MixProject do
       {:progress_bar, "~> 1.6", only: [:dev, :test]},
       {:timex, "~> 3.1", only: [:dev, :test]},
       {:table_rex, "~> 0.10", only: [:dev, :test]},
-      {:logger_file_backend, "~> 0.0.10", only: [:dev, :test]},
-      {:csv, "~> 2.0.0", only: [:dev, :test]}
+      {:logger_file_backend, "~> 0.0.10", only: [:dev, :test]}
     ]
   end
 
