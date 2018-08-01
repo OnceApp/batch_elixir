@@ -4,8 +4,6 @@ defmodule BatchElixir do
   alias BatchElixir.RestClient.Transactional.Recipients
   alias BatchElixir.Serialisation
   alias BatchElixir.Server.Producer
-  @default_deeplink Application.fetch_env!(:batch_elixir, :default_deeplink)
-  @devices Application.get_env(:batch_elixir, :devices)
 
   @moduledoc """
   Documentation for BatchElixir.
@@ -18,11 +16,14 @@ defmodule BatchElixir do
       rest_api_key: "rest api key", # Required, if not provided the application fail to start
       devices: [web: "sdk key", ios: "sdk key", ...], # List of devices that the notification can use. The key name are up to you
       default_deeplink: "myapp://",
-      producer_name: {:global, BatchProducer}, # Default, name of the producer
+      producer_name: BatchElixir.Server.Producer, # Default, name of the producer is BatchElixir.Server.Producer
       consumer_options: [], # Default to empty, extra options like mix/max demand for Genstage
-      queue_name: {:global, BatchQueue}, # Default, name of the batch queue
-      queue_implementation: BatchElixir.Server.Queue.Memory, # Default implentation of the queue
-      number_of_consumers: 1 # Number of consumer to start, default to 1
+      producer_options: [], # extra options for GenStage as producer. Typically [buffer_size: 10_000]
+      batch_url: "https://api.batch.com/1.1/", # Base url of batch api
+      retry_interval_in_milliseconds: 1_000, # Interval between each failed requests
+      max_attempts: 3, # Maximum attempts of failed requests
+      number_of_consumers: 1, # Number of consumers to pop. By default is 1
+      stats_driver: BatchElixir.Stats.Memory # BatchElixir.Stats.Memory For In memory stats or BatchElixir.Stats.Statix to send to datadog via Statix
     ```
 
   """
@@ -50,13 +51,24 @@ defmodule BatchElixir do
         custom_ids,
         title,
         message,
-        deeplink \\ @default_deeplink,
+        deeplink \\ nil,
         custom_payload \\ nil
       )
 
+  def send_notication(device, group_id, custom_ids, title, message, nil, custom_payload) do
+    send_notication(
+      device,
+      group_id,
+      custom_ids,
+      title,
+      message,
+      get_default_deeplink(),
+      custom_payload
+    )
+  end
+
   def send_notication(device, group_id, custom_ids, title, message, deeplink, nil) do
     structure = create_transactional_structure(group_id, custom_ids, title, message, deeplink)
-
     _send_notication(device, structure)
   end
 
@@ -78,7 +90,7 @@ defmodule BatchElixir do
   end
 
   defp _send_notication(device, transactional) do
-    _send_notication_with_api_key(@devices[device], transactional, device)
+    _send_notication_with_api_key(devices()[device], transactional, device)
   end
 
   defp _send_notication_with_api_key(nil, _transactional, device) do
@@ -101,4 +113,7 @@ defmodule BatchElixir do
       deeplink: deeplink
     }
   end
+
+  defp get_default_deeplink, do: Application.fetch_env!(:batch_elixir, :default_deeplink)
+  defp devices, do: Application.get_env(:batch_elixir, :devices, [])
 end

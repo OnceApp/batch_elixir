@@ -109,4 +109,4 @@ modules.xml
 coverage.xml
 coverage.html
 
-node_modules/
+*.log
