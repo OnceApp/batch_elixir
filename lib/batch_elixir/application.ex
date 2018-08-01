@@ -2,6 +2,8 @@ defmodule BatchElixir.Application do
   @moduledoc false
   @required_configuration_keys [:rest_api_key]
   alias BatchElixir.Environment
+  alias BatchElixir.Server.Consumer
+  alias BatchElixir.Server.Producer
 
   use Application
   require Logger
@@ -17,7 +19,7 @@ defmodule BatchElixir.Application do
       for i <- 1..number_of_consumers do
         %{
           id: i,
-          start: {BatchElixir.Server.Consumer, :start_link, []},
+          start: {Consumer, :start_link, []},
           restart: :permanent
         }
       end
@@ -25,13 +27,8 @@ defmodule BatchElixir.Application do
     children =
       [
         %{
-          id: BatchElixir.Server.Retry,
-          start: {BatchElixir.Server.Retry, :start_link, []},
-          restart: :permanent
-        },
-        %{
           id: BatchElixir.Server.Producer,
-          start: {BatchElixir.Server.Producer, :start_link, []},
+          start: {Producer, :start_link, []},
           restart: :permanent
         },
         %{

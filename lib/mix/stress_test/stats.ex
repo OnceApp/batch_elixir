@@ -8,9 +8,9 @@ defmodule StressTest.Stats do
 
   def handle_info(:dump, state) do
     result = Stats.dump()
-    succeed = get_value(result.count["batch.requests.succeed"])
-    failed = get_value(result.count["batch.requests.failed"])
-    retried = get_value(result.count["batch.requests.retried"])
+    succeed = get_value(result["batch.requests.succeed"])
+    failed = get_value(result["batch.requests.failed"])
+    retried = get_value(result["batch.requests.retried"])
     value = succeed + failed + retried
 
     result

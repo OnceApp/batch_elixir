@@ -18,7 +18,7 @@ defmodule BatchElixir.MixProject do
     [
       env: [
         stats_driver: BatchElixir.Stats.Memory,
-        producer_name: {:global, BatchProducer},
+        producer_name: BatchElixir.Server.Producer,
         consumer_options: [],
         producer_options: [],
         number_of_consumers: 1,
@@ -47,7 +47,8 @@ defmodule BatchElixir.MixProject do
       {:progress_bar, "~> 1.6", only: [:dev, :test]},
       {:timex, "~> 3.1", only: [:dev, :test]},
       {:table_rex, "~> 0.10", only: [:dev, :test]},
-      {:logger_file_backend, "~> 0.0.10", only: [:dev, :test]}
+      {:logger_file_backend, "~> 0.0.10", only: [:dev, :test]},
+      {:csv, "~> 2.0.0", only: [:dev, :test]}
     ]
   end
 

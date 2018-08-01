@@ -15,14 +15,21 @@ defmodule StressTest.Config do
     retry_interval_in_milliseconds: 1_000,
     max_attempts: 3
   ]
-  def setup(options) when is_binary(options) do
-    setup_config(@default)
+  def setup(options, default \\ true)
+
+  def setup(options, default) when is_binary(options) do
+    set_default(default)
     load_configuration_from_json(File.read(options))
   end
 
-  def setup(options) do
-    setup_config(@default)
+  def setup(options, default) do
+    set_default(default)
     setup_config(options)
+  end
+
+  defp set_default(true), do: setup_config(@default)
+
+  defp set_default(false) do
   end
 
   defp load_configuration_from_json({:ok, config}) do

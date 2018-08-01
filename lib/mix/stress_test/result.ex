@@ -27,11 +27,11 @@ defmodule StressTest.Result do
   end
 
   defp handle_end(result, max) do
-    total = get_value(result.count["batch.requests.total"])
-    succeed = get_value(result.count["batch.requests.succeed"])
-    failed = get_value(result.count["batch.requests.failed"])
-    retried = get_value(result.count["batch.requests.retried"])
-    timing = get_value(result.timing["batch.requests.timing"])
+    total = get_value(result["batch.requests.total"])
+    succeed = get_value(result["batch.requests.succeed"])
+    failed = get_value(result["batch.requests.failed"])
+    retried = get_value(result["batch.requests.retried"])
+    timing = get_value(result["batch.requests.timing"])
     lost = max - (succeed + failed)
 
     [max, total, succeed, failed, retried, lost, timing / total]

@@ -19,7 +19,7 @@ defmodule BatchElixir.Server.ConsurmerTest do
   alias BatchElixir.RestClient.Transactional.Message
   alias BatchElixir.RestClient.Transactional.Recipients
   alias BatchElixir.Server.Consumer
-  alias BatchElixir.Server.Retry
+  alias BatchElixir.Server.Producer
   alias BatchElixir.Stats
   use ExUnit.Case
   import Mock
@@ -37,6 +37,7 @@ defmodule BatchElixir.Server.ConsurmerTest do
 
   setup do
     assert {:ok, stat} = Stats.start_link()
+
     on_exit(fn ->
       assert_down(stat)
     end)
@@ -71,9 +72,9 @@ defmodule BatchElixir.Server.ConsurmerTest do
            {:error, 500, "test"}
          end
        ]},
-      {Retry, [],
+      {Producer, [],
        [
-         push: fn events ->
+         send_notifications: fn events ->
            assert @result = events
          end
        ]}
@@ -85,7 +86,7 @@ defmodule BatchElixir.Server.ConsurmerTest do
   test "send events with http errors that should not be retried" do
     with_mocks([
       {Transactional, [], [send: fn _api_key, _body -> {:error, 400, "test"} end]},
-      {Retry, [], [push: fn _ -> nil end]}
+      {Producer, [], [send_notifications: fn _ -> nil end]}
     ]) do
       Consumer.handle_events(generate_events(3), nil, nil)
     end
@@ -94,7 +95,7 @@ defmodule BatchElixir.Server.ConsurmerTest do
   test "send events with errors that should not be retried" do
     with_mocks([
       {Transactional, [], [send: fn _api_key, _body -> {:error, "test"} end]},
-      {Retry, [], [push: fn _ -> nil end]}
+      {Producer, [], [send_notifications: fn _ -> nil end]}
     ]) do
       Consumer.handle_events(generate_events(3), nil, nil)
     end

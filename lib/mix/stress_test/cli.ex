@@ -5,8 +5,6 @@ defmodule StressTest.CLI do
   use Timex
 
   def main(args \\ []) do
-    # ANSI.print(["Hello", :red, :bright, " World", :reset, "!"])
-
     args
     |> parse
     |> maybe_setup_from_json
@@ -38,6 +36,10 @@ defmodule StressTest.CLI do
     arg
   end
 
+  defp do_arg_action({:observer, _} = arg) do
+    arg
+  end
+
   defp do_arg_action({:start, _} = arg) do
     arg
   end
@@ -55,7 +57,8 @@ defmodule StressTest.CLI do
     """)
   end
 
-  defp start(params) do
+  defp start({args, _} = params) do
+    start_observer(args[:observer])
     {:ok, _} = Application.ensure_all_started(:timex)
     {:ok, _} = Application.ensure_all_started(:table_rex)
     now = Duration.now()
@@ -66,9 +69,28 @@ defmodule StressTest.CLI do
 
     IO.puts("Test duration:")
 
-    Duration.elapsed(now)
+    elapsed = Duration.elapsed(now)
+    {_, [max, iterations]} = params
+    max = String.to_integer(max)
+    iterations = String.to_integer(iterations)
+
+    elapsed
     |> Timex.format_duration(:humanized)
     |> IO.puts()
+
+    request_per_minute = round(abs(max * iterations / Duration.to_minutes(elapsed)))
+
+    IO.puts(
+      IO.ANSI.format(
+        ["Request per minute ", :green, Integer.to_string(request_per_minute)],
+        true
+      )
+    )
+  end
+
+  defp start_observer(true), do: :observer.start()
+
+  defp start_observer(_) do
   end
 
   defp run_iterations({args, [max, iterations]}) do
@@ -96,7 +118,7 @@ defmodule StressTest.CLI do
   defp _get_with_default(value, _default), do: value
 
   defp start_applications(consumers) do
-    Config.setup(number_of_consumers: consumers)
+    Config.setup([number_of_consumers: consumers], false)
     {:ok, app_pid} = BatchElixir.Application.start(nil, nil)
     {:ok, stats_pid} = StressTest.Stats.start_link(self())
     {app_pid, stats_pid}

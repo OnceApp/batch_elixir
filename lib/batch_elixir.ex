@@ -16,13 +16,14 @@ defmodule BatchElixir do
       rest_api_key: "rest api key", # Required, if not provided the application fail to start
       devices: [web: "sdk key", ios: "sdk key", ...], # List of devices that the notification can use. The key name are up to you
       default_deeplink: "myapp://",
-      producer_name: {:global, BatchProducer}, # Default, name of the producer
+      producer_name: BatchElixir.Server.Producer, # Default, name of the producer is BatchElixir.Server.Producer
       consumer_options: [], # Default to empty, extra options like mix/max demand for Genstage
       producer_options: [], # extra options for GenStage as producer. Typically [buffer_size: 10_000]
       batch_url: "https://api.batch.com/1.1/", # Base url of batch api
       retry_interval_in_milliseconds: 1_000, # Interval between each failed requests
       max_attempts: 3, # Maximum attempts of failed requests
-      number_of_consumers: 1 # Number of consumers to pop. By default is 1
+      number_of_consumers: 1, # Number of consumers to pop. By default is 1
+      stats_driver: BatchElixir.Stats.Memory # BatchElixir.Stats.Memory For In memory stats or BatchElixir.Stats.Statix to send to datadog via Statix
     ```
 
   """
@@ -114,5 +115,5 @@ defmodule BatchElixir do
   end
 
   defp get_default_deeplink, do: Application.fetch_env!(:batch_elixir, :default_deeplink)
-  defp devices, do: Application.get_env(:batch_elixir, :devices)
+  defp devices, do: Application.get_env(:batch_elixir, :devices, [])
 end
