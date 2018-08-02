@@ -26,7 +26,7 @@ defmodule BatchElixir.MixProject do
         retry_interval_in_milliseconds: 1_000,
         max_attempts: 3
       ],
-      applications: [:httpoison, :statix],
+      applications: [:httpoison, :statix, :gen_stage],
       extra_applications: [:logger]
     ] ++ mod_application(Mix.env())
   end
