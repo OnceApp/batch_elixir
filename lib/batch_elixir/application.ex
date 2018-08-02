@@ -14,6 +14,7 @@ defmodule BatchElixir.Application do
 
   defp _start([]) do
     number_of_consumers = Environment.get(:number_of_consumers)
+    batch_stats_driver = Environment.get(:stats_driver)
 
     consumers =
       for i <- 1..number_of_consumers do
@@ -33,7 +34,7 @@ defmodule BatchElixir.Application do
         },
         %{
           id: BatchElixir.Stats,
-          start: {BatchElixir.Stats, :start_link, []},
+          start: {batch_stats_driver, :start_link, []},
           restart: :permanent
         }
       ] ++ consumers
