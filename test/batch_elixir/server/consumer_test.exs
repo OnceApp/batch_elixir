@@ -20,7 +20,7 @@ defmodule BatchElixir.Server.ConsurmerTest do
   alias BatchElixir.RestClient.Transactional.Recipients
   alias BatchElixir.Server.Consumer
   alias BatchElixir.Server.Producer
-  alias BatchElixir.Stats
+  alias BatchElixir.Stats.Memory
   use ExUnit.Case
   import Mock
 
@@ -36,7 +36,7 @@ defmodule BatchElixir.Server.ConsurmerTest do
   end
 
   setup do
-    assert {:ok, stat} = Stats.start_link()
+    assert {:ok, stat} = Memory.start_link()
 
     on_exit(fn ->
       assert_down(stat)
