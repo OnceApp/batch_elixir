@@ -43,7 +43,8 @@ defmodule BatchElixir do
           title :: String.t(),
           message :: String.t(),
           deeplink :: String.t(),
-          custom_payload :: String.t() | nil
+          custom_payload :: String.t() | nil,
+          labels: [String.t()]
         ) :: :ok | {:error, String.t()}
   def send_notication(
         device,
@@ -52,10 +53,11 @@ defmodule BatchElixir do
         title,
         message,
         deeplink \\ nil,
-        custom_payload \\ nil
+        custom_payload \\ nil,
+        labels \\ []
       )
 
-  def send_notication(device, group_id, custom_ids, title, message, nil, custom_payload) do
+  def send_notication(device, group_id, custom_ids, title, message, nil, custom_payload, labels) do
     send_notication(
       device,
       group_id,
@@ -63,28 +65,29 @@ defmodule BatchElixir do
       title,
       message,
       get_default_deeplink(),
-      custom_payload
+      custom_payload,
+      labels
     )
   end
 
-  def send_notication(device, group_id, custom_ids, title, message, deeplink, nil) do
-    structure = create_transactional_structure(group_id, custom_ids, title, message, deeplink)
+  def send_notication(device, group_id, custom_ids, title, message, deeplink, nil, labels) do
+    structure = create_transactional_structure(group_id, custom_ids, title, message, deeplink, labels)
     _send_notication(device, structure)
   end
 
-  def send_notication(device, group_id, custom_ids, title, message, deeplink, custom_payload)
+  def send_notication(device, group_id, custom_ids, title, message, deeplink, custom_payload, labels)
       when is_map(custom_payload) do
     custom_payload =
       custom_payload
       |> Serialisation.structure_to_map()
       |> Poison.encode!()
 
-    send_notication(device, group_id, custom_ids, title, message, deeplink, custom_payload)
+    send_notication(device, group_id, custom_ids, title, message, deeplink, custom_payload, labels)
   end
 
-  def send_notication(device, group_id, custom_ids, title, message, deeplink, custom_payload)
+  def send_notication(device, group_id, custom_ids, title, message, deeplink, custom_payload, labels)
       when is_binary(custom_payload) do
-    structure = create_transactional_structure(group_id, custom_ids, title, message, deeplink)
+    structure = create_transactional_structure(group_id, custom_ids, title, message, deeplink, labels)
     structure = %Transactional{structure | custom_payload: custom_payload}
     _send_notication(device, structure)
   end
@@ -102,7 +105,7 @@ defmodule BatchElixir do
     :ok
   end
 
-  defp create_transactional_structure(group_id, custom_ids, title, message, deeplink) do
+  defp create_transactional_structure(group_id, custom_ids, title, message, deeplink, labels) do
     message = %Message{title: title, body: message}
     recipients = %Recipients{custom_ids: custom_ids}
 
@@ -110,7 +113,8 @@ defmodule BatchElixir do
       group_id: group_id,
       message: message,
       recipients: recipients,
-      deeplink: deeplink
+      deeplink: deeplink,
+      labels: labels
     }
   end
 
