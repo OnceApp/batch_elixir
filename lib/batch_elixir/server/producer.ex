@@ -13,8 +13,8 @@ defmodule BatchElixir.Server.Producer do
 
   defp start_or_get_pid({:global, name}), do: start_or_get_pid(:global.whereis_name(name), name)
   defp start_or_get_pid(name), do: GenStage.start_link(__MODULE__, :ok, name: name)
-  
-  defp start_or_get_pid(:undefined, name), do: GenServer.start_link(__MODULE__, :ok, name: {:global, name})
+
+  defp start_or_get_pid(:undefined, name), do: GenStage.start_link(__MODULE__, :ok, name: {:global, name})
   defp start_or_get_pid(pid, _name), do: {:ok, pid}
 
   def init(:ok) do
