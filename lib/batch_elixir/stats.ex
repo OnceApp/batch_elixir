@@ -2,7 +2,7 @@ defmodule BatchElixir.Stats do
   @moduledoc """
   In memory implementation of Queue
   """
- 
+
   def increment(key, value \\ 1) do
     GenServer.cast(BatchElixir.Stats, {:increment, key, value})
   end
