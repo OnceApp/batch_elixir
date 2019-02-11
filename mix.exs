@@ -5,8 +5,8 @@ defmodule BatchElixir.MixProject do
   def project do
     [
       app: :batch_elixir,
-      version: "0.1.0",
-      elixir: "~> 1.6",
+      version: "0.2.0",
+      elixir: "~> 1.8",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       test_coverage: test_coverage(System.get_env("CI"))
@@ -45,7 +45,7 @@ defmodule BatchElixir.MixProject do
       {:mock, "~> 0.3.0", only: :test},
       {:dialyxir, "~> 1.0.0-rc.2", only: [:dev, :test], runtime: false},
       {:progress_bar, "~> 1.6", only: [:dev, :test]},
-      {:timex, "~> 3.1", only: [:dev, :test]},
+      {:timex, "~> 3.5", only: [:dev, :test]},
       {:table_rex, "~> 0.10", only: [:dev, :test]},
       {:logger_file_backend, "~> 0.0.10", only: [:dev, :test]}
     ]

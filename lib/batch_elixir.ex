@@ -44,7 +44,8 @@ defmodule BatchElixir do
           message :: String.t(),
           deeplink :: String.t(),
           custom_payload :: String.t() | nil,
-          labels: [String.t()]
+          labels: [String.t()],
+          gcm_collapse_key_enabled: boolean()
         ) :: :ok | {:error, String.t()}
   def send_notication(
         device,
@@ -54,10 +55,21 @@ defmodule BatchElixir do
         message,
         deeplink \\ nil,
         custom_payload \\ nil,
-        labels \\ []
+        labels \\ [],
+        gcm_collapse_key_enabled \\ false
       )
 
-  def send_notication(device, group_id, custom_ids, title, message, nil, custom_payload, labels) do
+  def send_notication(
+        device,
+        group_id,
+        custom_ids,
+        title,
+        message,
+        nil,
+        custom_payload,
+        labels,
+        gcm_collapse_key_enabled
+      ) do
     send_notication(
       device,
       group_id,
@@ -66,46 +78,115 @@ defmodule BatchElixir do
       message,
       get_default_deeplink(),
       custom_payload,
-      labels
+      labels,
+      gcm_collapse_key_enabled
     )
   end
 
-  def send_notication(device, group_id, custom_ids, title, message, deeplink, nil, labels) do
-    structure = create_transactional_structure(group_id, custom_ids, title, message, deeplink, labels)
-    _send_notication(device, structure)
+  def send_notication(
+        device,
+        group_id,
+        custom_ids,
+        title,
+        message,
+        deeplink,
+        nil,
+        labels,
+        gcm_collapse_key_enabled
+      ) do
+    structure =
+      create_transactional_structure(
+        group_id,
+        custom_ids,
+        title,
+        message,
+        deeplink,
+        labels,
+        gcm_collapse_key_enabled
+      )
+
+    do_send_notication(device, structure)
   end
 
-  def send_notication(device, group_id, custom_ids, title, message, deeplink, custom_payload, labels)
+  def send_notication(
+        device,
+        group_id,
+        custom_ids,
+        title,
+        message,
+        deeplink,
+        custom_payload,
+        labels,
+        gcm_collapse_key_enabled
+      )
       when is_map(custom_payload) do
     custom_payload =
       custom_payload
       |> Serialisation.structure_to_map()
       |> Poison.encode!()
 
-    send_notication(device, group_id, custom_ids, title, message, deeplink, custom_payload, labels)
+    send_notication(
+      device,
+      group_id,
+      custom_ids,
+      title,
+      message,
+      deeplink,
+      custom_payload,
+      labels,
+      gcm_collapse_key_enabled
+    )
   end
 
-  def send_notication(device, group_id, custom_ids, title, message, deeplink, custom_payload, labels)
+  def send_notication(
+        device,
+        group_id,
+        custom_ids,
+        title,
+        message,
+        deeplink,
+        custom_payload,
+        labels,
+        gcm_collapse_key_enabled
+      )
       when is_binary(custom_payload) do
-    structure = create_transactional_structure(group_id, custom_ids, title, message, deeplink, labels)
+    structure =
+      create_transactional_structure(
+        group_id,
+        custom_ids,
+        title,
+        message,
+        deeplink,
+        labels,
+        gcm_collapse_key_enabled
+      )
+
     structure = %Transactional{structure | custom_payload: custom_payload}
-    _send_notication(device, structure)
+    do_send_notication(device, structure)
   end
 
-  defp _send_notication(device, transactional) do
-    _send_notication_with_api_key(devices()[device], transactional, device)
+  defp do_send_notication(device, transactional) do
+    do_send_notication_with_api_key(devices()[device], transactional, device)
   end
 
-  defp _send_notication_with_api_key(nil, _transactional, device) do
+  defp do_send_notication_with_api_key(nil, _transactional, device) do
     {:error, "No API key found for: #{device}"}
   end
 
-  defp _send_notication_with_api_key(api_key, transactional, _device) do
+  defp do_send_notication_with_api_key(api_key, transactional, _device) do
     Producer.send_notification(api_key, transactional)
     :ok
   end
 
-  defp create_transactional_structure(group_id, custom_ids, title, message, deeplink, labels) do
+  defp create_transactional_structure(
+         group_id,
+         custom_ids,
+         title,
+         message,
+         deeplink,
+         labels,
+         gcm_collapse_key_enabled
+       ) do
     message = %Message{title: title, body: message}
     recipients = %Recipients{custom_ids: custom_ids}
 
@@ -114,7 +195,8 @@ defmodule BatchElixir do
       message: message,
       recipients: recipients,
       deeplink: deeplink,
-      labels: labels
+      labels: labels,
+      gcm_collapse_key: %{"enabled" => gcm_collapse_key_enabled}
     }
   end
 

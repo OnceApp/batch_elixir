@@ -14,4 +14,3 @@ config :statix,
   prefix: "test",
   host: "localhost",
   port: 8125
-

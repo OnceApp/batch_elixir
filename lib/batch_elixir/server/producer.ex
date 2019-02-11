@@ -7,8 +7,16 @@ defmodule BatchElixir.Server.Producer do
 
   def start_link do
     Logger.info(fn -> "Starting producer" end)
-    GenStage.start_link(__MODULE__, :ok, name: Environment.get(:producer_name))
+    start_or_get_pid(Environment.get(:producer_name))
   end
+
+  defp start_or_get_pid({:global, name}), do: start_or_get_pid(:global.whereis_name(name), name)
+  defp start_or_get_pid(name), do: GenStage.start_link(__MODULE__, :ok, name: name)
+
+  defp start_or_get_pid(:undefined, name),
+    do: GenStage.start_link(__MODULE__, :ok, name: {:global, name})
+
+  defp start_or_get_pid(pid, _name), do: {:ok, pid}
 
   def init(:ok) do
     {:producer, %{queue: :queue.new(), demand: 0}, Environment.get(:producer_options)}
