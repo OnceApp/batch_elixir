@@ -5,8 +5,8 @@ defmodule BatchElixir.MixProject do
   def project do
     [
       app: :batch_elixir,
-      version: "0.1.0",
-      elixir: "~> 1.6",
+      version: "0.2.0",
+      elixir: "~> 1.8",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       test_coverage: test_coverage(System.get_env("CI"))
