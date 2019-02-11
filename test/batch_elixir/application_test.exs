@@ -1,4 +1,5 @@
 defmodule BatchElixir.ApplicationTest do
+  @moduledoc false
   alias BatchElixir.Application, as: App
 
   use ExUnit.Case
@@ -7,7 +8,7 @@ defmodule BatchElixir.ApplicationTest do
     Application.put_env(:batch_elixir, :rest_api_key, "test")
     Application.put_env(:batch_elixir, :producer_name, {:global, BatchProducer})
     assert {:ok, pid} = App.start(nil, nil)
-    Application.stop(pid)
+    Process.exit(pid, :shutdown)
   end
 
   test "Should fail if missing required configuration key" do
