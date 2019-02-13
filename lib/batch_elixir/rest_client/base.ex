@@ -74,7 +74,10 @@ defmodule BatchElixir.RestClient.Base do
   defp handle_response({:error, _} = errored), do: errored
 
   defp retrieve_error_message_from_body(body_as_string) do
-    body = body_as_string |> Poison.decode!()
-    body["message"]
+    with {:ok, body} <- Poison.decode(body_as_string) do
+      body["message"]
+    else
+      _ -> body_as_string
+    end
   end
 end

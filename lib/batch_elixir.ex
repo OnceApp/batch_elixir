@@ -199,6 +199,7 @@ defmodule BatchElixir do
       gcm_collapse_key: get_gcm_collapse_key(gcm_collapse_key_enabled)
     }
   end
+
   defp get_gcm_collapse_key(nil), do: nil
   defp get_gcm_collapse_key(value) when is_boolean(value), do: %{"enabled" => value}
   defp get_default_deeplink, do: Application.fetch_env!(:batch_elixir, :default_deeplink)
