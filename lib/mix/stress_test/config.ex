@@ -48,7 +48,7 @@ defmodule StressTest.Config do
 
     Logger.configure_backend(
       {LoggerFileBackend, :stress_test},
-      path: System.cwd() <> "/stress_test.log",
+      path: File.cwd() <> "/stress_test.log",
       level: :warn
     )
 

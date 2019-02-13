@@ -45,7 +45,7 @@ defmodule BatchElixir do
           deeplink :: String.t(),
           custom_payload :: String.t() | nil,
           labels: [String.t()],
-          gcm_collapse_key_enabled: boolean()
+          gcm_collapse_key_enabled: boolean() | nil
         ) :: :ok | {:error, String.t()}
   def send_notication(
         device,
@@ -56,7 +56,7 @@ defmodule BatchElixir do
         deeplink \\ nil,
         custom_payload \\ nil,
         labels \\ [],
-        gcm_collapse_key_enabled \\ false
+        gcm_collapse_key_enabled \\ nil
       )
 
   def send_notication(
@@ -196,10 +196,11 @@ defmodule BatchElixir do
       recipients: recipients,
       deeplink: deeplink,
       labels: labels,
-      gcm_collapse_key: %{"enabled" => gcm_collapse_key_enabled}
+      gcm_collapse_key: get_gcm_collapse_key(gcm_collapse_key_enabled)
     }
   end
-
+  defp get_gcm_collapse_key(nil), do: nil
+  defp get_gcm_collapse_key(value) when is_boolean(value), do: %{"enabled" => value}
   defp get_default_deeplink, do: Application.fetch_env!(:batch_elixir, :default_deeplink)
   defp devices, do: Application.get_env(:batch_elixir, :devices, [])
 end

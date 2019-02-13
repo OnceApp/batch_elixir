@@ -1,6 +1,6 @@
 defmodule BatchElixir.Environment do
   @moduledoc """
-  Wrapper module to access €to the application environment value
+  Wrapper module to access to the application environment value
   """
   @doc """
   Get the value from a key.
